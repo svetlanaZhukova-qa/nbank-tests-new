@@ -35,40 +35,10 @@ public class TransferMoneyTest extends LoggerClass {
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой. Максимальная сумма 10000")
 	public void UserCanTransferMoneyFromOneAccountToAnother(int sum){
 		// создаем пользователя
-		String randomUser = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -167,40 +137,10 @@ public class TransferMoneyTest extends LoggerClass {
 	@DisplayName("Пользователь не может переводить отрицательные суммы и суммы больше 10000")
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(int sum, String error){
 		// создаем пользователя
-		String randomUser = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -288,73 +228,13 @@ public class TransferMoneyTest extends LoggerClass {
 	public void userCantTransferMoneyFromSomeOneAccountToHisOne(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		String randomUser1 = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",randomUser1 ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser1 = UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken1 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser1))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken1 = UserHelper.getToken();
 		// 2-ой юзер
-		String randomUser2= "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",randomUser2 ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser2= UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken2 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser2))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken2 = UserHelper.getToken();
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
 		Response responseUser1 = given()
@@ -437,73 +317,13 @@ public class TransferMoneyTest extends LoggerClass {
 	public void userCanTransferMoneyFromHisAccountToAnother(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		String randomUser1 = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",randomUser1 ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser1 = UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken1 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser1))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken1 = UserHelper.getToken();
 		// 2-ой юзер
-		String randomUser2= "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",randomUser2 ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser2= UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken2 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser2))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken2 = UserHelper.getToken();
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
 		Response responseUser1 = given()
@@ -588,40 +408,10 @@ public class TransferMoneyTest extends LoggerClass {
 	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
 	public void userCanSeeTrackingOfTheirAccounts(){
 		// создаем пользователя
-		String randomUser = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -709,74 +499,14 @@ public class TransferMoneyTest extends LoggerClass {
 	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
 	public void userCanSeeTrackingOfOtherAccounts(){
 		// создаем юзера1 под которым будет отслеживать операции
-		String randomUser = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser = UserHelper.createUser();
 		// берем токен
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 
 		// создаем юзера 2 у которого будем отслеживать операции
-		String randomUser2 = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser2))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String randomUser2 = UserHelper.createUser();
 		// берем токен
-		String userToken2 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", randomUser2))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.extract()
-				.header("Authorization");
+		String userToken2 = UserHelper.getToken();
 
 		// создаем счет ко второму юзеру
 		Response response = given()

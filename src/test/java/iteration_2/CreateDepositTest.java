@@ -29,49 +29,16 @@ import static io.restassured.RestAssured.given;
 @DisplayName("Тесты на проверку возможности создания Депозита")
 public class CreateDepositTest extends LoggerClass {
 
-
 	@ParameterizedTest
 	@Tag("positive")
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
-
+		String userToken = UserHelper.getToken();
 		// создаем счет
 		Response response = given()
 				.contentType(ContentType.JSON)
@@ -121,41 +88,10 @@ public class CreateDepositTest extends LoggerClass {
 	@MethodSource("notValidSum")
 	public void userCantCreateDepositWithNotValidSum(int deposit, String error){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 
 		// создаем счет
 		Response response = given()
@@ -194,41 +130,10 @@ public class CreateDepositTest extends LoggerClass {
 	@DisplayName("Пользователь не может переводить деньги на не существующий счет")
 	public void userCantCreateDepositOnNonExistAccount(){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 		// переводим депозит
 		given()
 				.contentType(ContentType.JSON)
@@ -253,41 +158,10 @@ public class CreateDepositTest extends LoggerClass {
 	@DisplayName("Пользователь не может переводить деньги на чужой счет")
 	public void userCantCreateDepositOnAnotherAccount(){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken = UserHelper.getToken();
 
 		// создаем второго пользователя
 		String uniqueUsername2 = "User_" + UUID.randomUUID().toString().substring(0, 8);
