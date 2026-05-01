@@ -33,7 +33,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 		// запрашиваем информацию о профиле
 		given()
 				.contentType(ContentType.JSON)
@@ -63,7 +63,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 		// меняем имя
 		given()
 				.contentType(ContentType.JSON)
@@ -96,7 +96,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 		// меняем имя
 		given()
 				.contentType(ContentType.JSON)

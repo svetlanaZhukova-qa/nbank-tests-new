@@ -8,10 +8,11 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 
 public class UserHelper {
-	private static  String uniqueUsername;
+
+
 	public static String createUser(){
 		// создаем пользователя
-		 uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
+		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
 
 		given()
 				.contentType(ContentType.JSON)
@@ -30,7 +31,8 @@ public class UserHelper {
 				.statusCode(HttpStatus.SC_CREATED);
 		return uniqueUsername;
 	}
-	public static String getToken(){
+
+	public static String getToken(String userName){
 		String userToken = given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
@@ -40,7 +42,7 @@ public class UserHelper {
 						  "password": "verysTRongPassword33$",
 						  "role": "USER"
 						}
-						""", uniqueUsername))
+						""", userName))
 				.when()
 				.post("http://localhost:4111/api/v1/auth/login")
 				.then()
@@ -49,4 +51,10 @@ public class UserHelper {
 				.header("Authorization");
 		return userToken;
 	}
+
+//	private static int createAccount(){
+//
+//	}
+
+
 }

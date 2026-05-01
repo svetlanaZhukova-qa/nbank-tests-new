@@ -38,7 +38,7 @@ public class CreateDepositTest extends LoggerClass {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 		// создаем счет
 		Response response = given()
 				.contentType(ContentType.JSON)
@@ -91,7 +91,7 @@ public class CreateDepositTest extends LoggerClass {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 
 		// создаем счет
 		Response response = given()
@@ -133,7 +133,7 @@ public class CreateDepositTest extends LoggerClass {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 		// переводим депозит
 		given()
 				.contentType(ContentType.JSON)
@@ -161,7 +161,7 @@ public class CreateDepositTest extends LoggerClass {
 		String uniqueUsername = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(uniqueUsername);
 
 		// создаем второго пользователя
 		String uniqueUsername2 = "User_" + UUID.randomUUID().toString().substring(0, 8);

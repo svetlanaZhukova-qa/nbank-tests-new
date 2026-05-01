@@ -38,7 +38,7 @@ public class TransferMoneyTest extends LoggerClass {
 		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -140,7 +140,7 @@ public class TransferMoneyTest extends LoggerClass {
 		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -230,11 +230,11 @@ public class TransferMoneyTest extends LoggerClass {
 		// 1-ый юзер
 		String randomUser1 = UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken1 = UserHelper.getToken();
+		String userToken1 = UserHelper.getToken(randomUser1);
 		// 2-ой юзер
 		String randomUser2= UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken2 = UserHelper.getToken();
+		String userToken2 = UserHelper.getToken(randomUser2);
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
 		Response responseUser1 = given()
@@ -319,11 +319,11 @@ public class TransferMoneyTest extends LoggerClass {
 		// 1-ый юзер
 		String randomUser1 = UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken1 = UserHelper.getToken();
+		String userToken1 = UserHelper.getToken(randomUser1);
 		// 2-ой юзер
 		String randomUser2= UserHelper.createUser();
 		// получаем токен пользователя
-		String userToken2 = UserHelper.getToken();
+		String userToken2 = UserHelper.getToken(randomUser2);
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
 		Response responseUser1 = given()
@@ -411,7 +411,7 @@ public class TransferMoneyTest extends LoggerClass {
 		String randomUser = UserHelper.createUser();
 
 		// берем токен
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
 		Response response1 = given()
@@ -501,12 +501,12 @@ public class TransferMoneyTest extends LoggerClass {
 		// создаем юзера1 под которым будет отслеживать операции
 		String randomUser = UserHelper.createUser();
 		// берем токен
-		String userToken = UserHelper.getToken();
+		String userToken = UserHelper.getToken(randomUser);
 
 		// создаем юзера 2 у которого будем отслеживать операции
 		String randomUser2 = UserHelper.createUser();
 		// берем токен
-		String userToken2 = UserHelper.getToken();
+		String userToken2 = UserHelper.getToken(randomUser2);
 
 		// создаем счет ко второму юзеру
 		Response response = given()
