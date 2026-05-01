@@ -1,6 +1,7 @@
 package iteration_2;
 
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
 import java.util.UUID;
@@ -52,9 +53,22 @@ public class UserHelper {
 		return userToken;
 	}
 
-//	private static int createAccount(){
-//
-//	}
+	public static int createAccount(String userToken){
+		Response response = given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.when()
+				.post("http://localhost:4111/api/v1/accounts")
+				.then()
+				.statusCode(201)
+				.extract()
+				.response();
+
+		int idValue = response.jsonPath().getInt("id");
+		return idValue;
+
+	}
 
 
 }

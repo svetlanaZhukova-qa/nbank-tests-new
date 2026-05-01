@@ -39,19 +39,9 @@ public class CreateDepositTest extends LoggerClass {
 
 		// получаем токен пользователя
 		String userToken = UserHelper.getToken(uniqueUsername);
-		// создаем счет
-		Response response = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(201)
-				.extract()
-				.response();
 
-		int idValue = response.jsonPath().getInt("id");
+		// создаем счет
+		int idValue = UserHelper.createAccount(userToken);
 		// переводим депозит на счет
 		String requestBody = String.format("""
 				{
@@ -164,52 +154,14 @@ public class CreateDepositTest extends LoggerClass {
 		String userToken = UserHelper.getToken(uniqueUsername);
 
 		// создаем второго пользователя
-		String uniqueUsername2 = "User_" + UUID.randomUUID().toString().substring(0, 8);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername2 ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
+		String uniqueUsername2 = UserHelper.createUser();
 
 		// получаем токен пользователя
-		String userToken2 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername2))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		String userToken2 = UserHelper.getToken(uniqueUsername2);
+
 		// создаем счет у второго пользователя
-		Response response = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken2)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED)
-				.extract()
-				.response();
-		int idAccountUser2 = response.jsonPath().getInt("id");
+
+		int idAccountUser2 = UserHelper.createAccount(userToken2);
 		// переводим депозит под токеном первого пользователя на второй
 		given()
 				.contentType(ContentType.JSON)
