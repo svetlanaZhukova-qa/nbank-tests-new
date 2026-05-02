@@ -41,58 +41,24 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
-		int idValue1 = UserHelper.createAccount(userToken);
+		int idValue1 = AccountHelper.createAccount(userToken);
 		// 2-ой счет
-		int idValue2 = UserHelper.createAccount(userToken);
+		int idValue2 = AccountHelper.createAccount(userToken);
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 5000
-						}
-						""",idValue1))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response1 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response1.then()
 				.statusCode(HttpStatus.SC_OK);
 
 		// 2-ой раз на 5 000
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 5000
-						}
-						""",idValue1))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response2 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response2.then()
 				.statusCode(HttpStatus.SC_OK);
 
 		// переводим деньги с одного счета на другой
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "senderAccountId": %d,
-						  "receiverAccountId": %d,
-						  "amount": %d
-						}
-						""",idValue1, idValue2,sum))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer")
-				.then()
+		Response response = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, sum);
+		response.then()
 				.statusCode(HttpStatus.SC_OK)
 				.body("senderAccountId", Matchers.equalTo(idValue1))
 				.body("receiverAccountId", Matchers.equalTo(idValue2))
@@ -120,81 +86,24 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
-		Response response1 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(201)
-				.extract()
-				.response();
-
-		int idValue1 = response1.jsonPath().getInt("id");
-
+		int idValue1 = AccountHelper.createAccount(userToken);
 		// 2-ой счет
-		Response response2 = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(201)
-				.extract()
-				.response();
-
-		int idValue2 = response2.jsonPath().getInt("id");
+		int idValue2 = AccountHelper.createAccount(userToken);
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 5000
-						}
-						""",idValue1))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response1 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response1.then()
 				.statusCode(HttpStatus.SC_OK);
 
 		// 2-ой раз на 5 000
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 5000
-						}
-						""",idValue1))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response2 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response2.then()
 				.statusCode(HttpStatus.SC_OK);
 
 		// переводим деньги с одного счета на другой
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "senderAccountId": %d,
-						  "receiverAccountId": %d,
-						  "amount": %d
-						}
-						""",idValue1, idValue2,sum))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer")
-				.then()
+		Response response = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, sum);
+		response.then()
 				.statusCode(HttpStatus.SC_BAD_REQUEST)
 				.body(Matchers.equalTo(error));
 	}
@@ -214,55 +123,22 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken2 = UserHelper.getToken(randomUser2);
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
-		int idAccountFirstUser = UserHelper.createAccount(userToken1);
+		int idAccountFirstUser = AccountHelper.createAccount(userToken1);
 		// 2-ой юзер
-		int idAccountSecondUser = UserHelper.createAccount(userToken2);
+		int idAccountSecondUser = AccountHelper.createAccount(userToken2);
 		// пополняем каждый счет
 		// 1-ый юзер
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken1)
-				.body(String.format("""
-				{
-						  "id": %d,
-						  "balance": 500
-						}
-				""",idAccountFirstUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response1 = AccountHelper.createDeposit(userToken1,idAccountFirstUser, 500 );
+		response1.then()
 				.statusCode(HttpStatus.SC_OK);
 		// 2-ой юзер
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken2)
-				.body(String.format("""
-				{
-						  "id": %d,
-						  "balance": 500
-						}
-				""",idAccountSecondUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response2 = AccountHelper.createDeposit(userToken2,idAccountSecondUser, 500 );
+		response2.then()
 				.statusCode(HttpStatus.SC_OK);
+
 		// переводим деньги под одним юзером с чужого счета на его
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.TEXT)
-				.header("Authorization", userToken1)
-				.body(String.format("""
-						{
-						  "senderAccountId": %d,
-						  "receiverAccountId": %d,
-						  "amount": 50
-						}
-						""",idAccountSecondUser, idAccountFirstUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer")
-				.then()
+		Response response = AccountHelper.createTransferMoney(userToken1, idAccountSecondUser, idAccountFirstUser, 50);
+		response.then()
 				.statusCode(HttpStatus.SC_FORBIDDEN)
 				.body(Matchers.equalTo("Unauthorized access to account"));
 
@@ -283,60 +159,27 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken2 = UserHelper.getToken(randomUser2);
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
-		int idAccountFirstUser = UserHelper.createAccount(userToken1);
+		int idAccountFirstUser = AccountHelper.createAccount(userToken1);
 		// 2-ой юзер
-		int idAccountSecondUser = UserHelper.createAccount(userToken2);
+		int idAccountSecondUser = AccountHelper.createAccount(userToken2);
 		// пополняем каждый счет
 		// 1-ый юзер
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken1)
-				.body(String.format("""
-				{
-						  "id": %d,
-						  "balance": 500
-						}
-				""",idAccountFirstUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response1 = AccountHelper.createDeposit(userToken1,idAccountFirstUser, 500 );
+		response1.then()
 				.statusCode(HttpStatus.SC_OK);
 		// 2-ой юзер
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken2)
-				.body(String.format("""
-				{
-						  "id": %d,
-						  "balance": 500
-						}
-				""",idAccountSecondUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response2 = AccountHelper.createDeposit(userToken2,idAccountSecondUser, 500 );
+		response2.then()
 				.statusCode(HttpStatus.SC_OK);
 		// переводим деньги под одним юзером на другой счет
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken1)
-				.body(String.format("""
-						{
-						  "senderAccountId": %d,
-						  "receiverAccountId": %d,
-						  "amount": 50
-						}
-						""",idAccountFirstUser, idAccountSecondUser))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer")
-				.then()
+		Response response = AccountHelper.createTransferMoney(userToken1, idAccountFirstUser, idAccountSecondUser, 50);
+		response.then()
 				.statusCode(HttpStatus.SC_OK)
 				.body("message", Matchers.equalTo("Transfer successful"))
 				.body("senderAccountId", Matchers.equalTo(idAccountFirstUser))
 				.body("receiverAccountId", Matchers.equalTo(idAccountSecondUser))
 				.body("amount", Matchers.equalTo((float)50));
+
 
 	}
 
@@ -351,42 +194,20 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken = UserHelper.getToken(randomUser);
 		// создаем 2 счета
 		//1-ый счет
-		int idValue1 = UserHelper.createAccount(userToken);
+		int idValue1 = AccountHelper.createAccount(userToken);
 		// 2-ой счет
-		int idValue2 = UserHelper.createAccount(userToken);
+		int idValue2 = AccountHelper.createAccount(userToken);
 
 		// пополняем первый счет
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 4999
-						}
-						""",idValue1))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response = AccountHelper.createDeposit(userToken,idValue1, 4999 );
+		response.then()
 				.statusCode(HttpStatus.SC_OK);
 
 		// переводим деньги с одного счета на другой
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "senderAccountId": %d,
-						  "receiverAccountId": %d,
-						  "amount": 50
-						}
-						""",idValue1, idValue2))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer")
-				.then()
+		Response response1 = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, 50);
+		response1.then()
 				.statusCode(HttpStatus.SC_OK);
+
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта
@@ -423,7 +244,7 @@ public class TransferMoneyTest extends LoggerClass {
 		String userToken2 = UserHelper.getToken(randomUser2);
 
 		// создаем счет ко второму юзеру
-		int idValueAccountUser2 = UserHelper.createAccount(userToken2);
+		int idValueAccountUser2 = AccountHelper.createAccount(userToken2);
 		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
 		given()
 				.contentType(ContentType.JSON)

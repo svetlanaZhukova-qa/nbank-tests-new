@@ -41,22 +41,11 @@ public class CreateDepositTest extends LoggerClass {
 		String userToken = UserHelper.getToken(uniqueUsername);
 
 		// создаем счет
-		int idValue = UserHelper.createAccount(userToken);
+		int idValue = AccountHelper.createAccount(userToken);
 		// переводим депозит на счет
-		String requestBody = String.format("""
-				{
-						  "id": %d,
-						  "balance": %d
-						}
-				""",idValue, deposit);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(requestBody)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+		Response response = AccountHelper.createDeposit(userToken, idValue, deposit);
+
+		response.then()
 				.statusCode(200)
 				.body("id", Matchers.equalTo(idValue))
 				.body("balance", Matchers.equalTo((float)deposit));
@@ -84,33 +73,11 @@ public class CreateDepositTest extends LoggerClass {
 		String userToken = UserHelper.getToken(uniqueUsername);
 
 		// создаем счет
-		Response response = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(201)
-				.extract()
-				.response();
-
-		int idValue = response.jsonPath().getInt("id");
+		int idValue = AccountHelper.createAccount(userToken);
 		// переводим счет на депозит
-		String requestBody = String.format("""
-				{
-						  "id": %d,
-						  "balance": %d
-						}
-				""",idValue, deposit);
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(requestBody)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+
+		Response response = AccountHelper.createDeposit(userToken, idValue, deposit);
+		response.then()
 				.statusCode(HttpStatus.SC_BAD_REQUEST)
 				.body(Matchers.equalTo(error));
 	}
@@ -125,19 +92,10 @@ public class CreateDepositTest extends LoggerClass {
 		// получаем токен пользователя
 		String userToken = UserHelper.getToken(uniqueUsername);
 		// переводим депозит
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
-				.body("""
-						{
-						  "id": 10,
-						  "balance": 100
-						}
-						""")
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+
+
+		Response response = AccountHelper.createDeposit(userToken,10, 100);
+		response.then()
 				.body(Matchers.equalTo("Unauthorized access to account"))
 				.statusCode(HttpStatus.SC_FORBIDDEN);
 
@@ -161,21 +119,11 @@ public class CreateDepositTest extends LoggerClass {
 
 		// создаем счет у второго пользователя
 
-		int idAccountUser2 = UserHelper.createAccount(userToken2);
+		int idAccountUser2 = AccountHelper.createAccount(userToken2);
 		// переводим депозит под токеном первого пользователя на второй
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "id": %d,
-						  "balance": 100
-						}
-						""", idAccountUser2))
-				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit")
-				.then()
+
+		Response response = AccountHelper.createDeposit(userToken, idAccountUser2, 100);
+		response.then()
 				.body(Matchers.equalTo("Unauthorized access to account"))
 				.statusCode(HttpStatus.SC_FORBIDDEN);
 

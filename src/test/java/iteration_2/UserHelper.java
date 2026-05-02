@@ -53,22 +53,7 @@ public class UserHelper {
 		return userToken;
 	}
 
-	public static int createAccount(String userToken){
-		Response response = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.post("http://localhost:4111/api/v1/accounts")
-				.then()
-				.statusCode(201)
-				.extract()
-				.response();
 
-		int idValue = response.jsonPath().getInt("id");
-		return idValue;
-
-	}
 
 
 }
