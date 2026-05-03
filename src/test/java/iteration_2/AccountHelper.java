@@ -12,7 +12,7 @@ public class AccountHelper {
 				.accept(ContentType.JSON)
 				.header("Authorization", userToken)
 				.when()
-				.post("http://localhost:4111/api/v1/accounts")
+				.post(ApiEndpoints.CREATE_ACCOUNT)
 				.then()
 				.statusCode(201)
 				.extract()
@@ -36,7 +36,7 @@ public class AccountHelper {
 				.header("Authorization", userToken)
 				.body(requestBody)
 				.when()
-				.post("http://localhost:4111/api/v1/accounts/deposit");
+				.post(ApiEndpoints.CREATE_DEPOSIT);
 	}
 
 	public static Response createTransferMoney(String userToken,int idValueAccount1, int idValueAccount2, int sum ){
@@ -52,6 +52,6 @@ public class AccountHelper {
 						}
 						""",idValueAccount1, idValueAccount2,sum))
 				.when()
-				.post("http://localhost:4111/api/v1/accounts/transfer");
+				.post(ApiEndpoints.CREATE_TRANSFER);
 	}
 }

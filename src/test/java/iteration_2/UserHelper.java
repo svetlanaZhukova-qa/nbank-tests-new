@@ -27,7 +27,7 @@ public class UserHelper {
 						}
 						""",uniqueUsername ))
 				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
+				.post(ApiEndpoints.CREATE_USERS)
 				.then()
 				.statusCode(HttpStatus.SC_CREATED);
 		return uniqueUsername;
@@ -45,7 +45,7 @@ public class UserHelper {
 						}
 						""", userName))
 				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
+				.post(ApiEndpoints.GET_TOKEN)
 				.then()
 				.statusCode(200)
 				.extract()
