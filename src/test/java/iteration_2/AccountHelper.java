@@ -7,10 +7,11 @@ import static io.restassured.RestAssured.given;
 import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class AccountHelper {
+	private AccountHelper() {
+		throw new IllegalStateException("Utility class");
+	}
 	public static int createAccount(String userToken){
-		Response response = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		Response response = RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.when()
 				.post(ApiEndpoints.CREATE_ACCOUNT)
@@ -31,9 +32,7 @@ public class AccountHelper {
 						  "balance": %d
 						}
 				""",idValueAccount, deposit);
-		return given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		return RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.body(requestBody)
 				.when()
@@ -41,9 +40,7 @@ public class AccountHelper {
 	}
 
 	public static Response createTransferMoney(String userToken,int idValueAccount1, int idValueAccount2, int sum ){
-		return given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		return RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.body(String.format("""
 						{

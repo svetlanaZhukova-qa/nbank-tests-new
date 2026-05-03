@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import java.util.List;
 
 public class LoggerClass {
+
 	@BeforeAll
 	public static void setUpRestAssured(){
 		RestAssured.baseURI = "http://localhost:4111";

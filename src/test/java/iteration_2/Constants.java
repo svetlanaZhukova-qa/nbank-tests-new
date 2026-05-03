@@ -1,6 +1,10 @@
 package iteration_2;
 
 public final class Constants {
+
+	private Constants() {
+		throw new IllegalStateException("Utility class");
+	}
 	// header_constants
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	// request_constants

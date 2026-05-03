@@ -1,6 +1,10 @@
 package iteration_2;
 
 public class MessageForTransferMoneyClass {
+
+	private MessageForTransferMoneyClass() {
+		throw new IllegalStateException("Utility class");
+	}
 	public static final String MESSAGE_CREATE_TRANSFER_SC200 = "Transfer successful";
 	public static final String MESSAGE_CREATE_TRANSFER_SC400_EXCEED10000 = "Transfer amount cannot exceed 10000";
 	public static final String MESSAGE_CREATE_TRANSFER_SC400_LEAST001 = "Transfer amount must be at least 0.01";

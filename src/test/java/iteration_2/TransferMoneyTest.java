@@ -213,9 +213,7 @@ public class TransferMoneyTest extends LoggerClass {
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.pathParam("id", idValue1)
 				.when()

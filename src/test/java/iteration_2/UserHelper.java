@@ -11,14 +11,16 @@ import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class UserHelper {
 
+	private UserHelper() {
+		throw new IllegalStateException("Utility class");
+	}
+
 
 	public static String createUser(){
 		// создаем пользователя
 		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
 
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, "Basic YWRtaW46YWRtaW4=")
 				.body(String.format("""
 						{
@@ -35,9 +37,7 @@ public class UserHelper {
 	}
 
 	public static String getToken(String userName){
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		String userToken = RequestSpec.getBaseSpec()
 				.body(String.format("""
 						{
 						  "username": "%s",

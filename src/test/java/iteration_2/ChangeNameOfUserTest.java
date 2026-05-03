@@ -39,9 +39,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		// получаем токен пользователя
 		String userToken = UserHelper.getToken(uniqueUsername);
 		// запрашиваем информацию о профиле
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.when()
 				.get("http://localhost:4111/api/v1/customer/profile")
@@ -69,9 +67,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		// получаем токен пользователя
 		String userToken = UserHelper.getToken(uniqueUsername);
 		// меняем имя
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
+		RequestSpec.getBaseSpec()
 				.header(HEADER_AUTHORIZATION, userToken)
 				.body(String.format("""
 						{
