@@ -1,12 +1,9 @@
 package iteration_2;
 
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
 import java.util.UUID;
 
-import static io.restassured.RestAssured.given;
 import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class UserHelper {

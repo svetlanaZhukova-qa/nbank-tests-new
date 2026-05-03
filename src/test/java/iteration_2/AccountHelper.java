@@ -1,9 +1,7 @@
 package iteration_2;
 
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
-import static io.restassured.RestAssured.given;
 import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class AccountHelper {
