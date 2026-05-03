@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class UserHelper {
 
@@ -18,7 +19,7 @@ public class UserHelper {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
+				.header(HEADER_AUTHORIZATION, "Basic YWRtaW46YWRtaW4=")
 				.body(String.format("""
 						{
 						  "username": "%s",
@@ -49,7 +50,7 @@ public class UserHelper {
 				.then()
 				.statusCode(200)
 				.extract()
-				.header("Authorization");
+				.header(HEADER_AUTHORIZATION);
 		return userToken;
 	}
 

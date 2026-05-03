@@ -4,13 +4,14 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
+import static iteration_2.Constants.HEADER_AUTHORIZATION;
 
 public class AccountHelper {
 	public static int createAccount(String userToken){
 		Response response = given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.when()
 				.post(ApiEndpoints.CREATE_ACCOUNT)
 				.then()
@@ -33,7 +34,7 @@ public class AccountHelper {
 		return given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.body(requestBody)
 				.when()
 				.post(ApiEndpoints.CREATE_DEPOSIT);
@@ -43,7 +44,7 @@ public class AccountHelper {
 		return given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.body(String.format("""
 						{
 						  "senderAccountId": %d,

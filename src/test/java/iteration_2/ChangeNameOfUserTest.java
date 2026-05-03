@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static iteration_2.ApiEndpoints.GET_PROFILE;
+import static iteration_2.Constants.*;
 
 // Изменение имени пользователя
 // Имя в профиле (name):
@@ -38,18 +40,18 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.when()
 				.get("http://localhost:4111/api/v1/customer/profile")
 				.then()
 				.statusCode(HttpStatus.SC_OK)
 				.body("$",Matchers.allOf(
-				Matchers.hasKey("id"),
-				Matchers.hasKey("username"),
-				Matchers.hasKey("password"),
-				Matchers.hasKey("name"),
-				Matchers.hasKey("role"),
-				Matchers.hasKey("accounts")
+				Matchers.hasKey(ID),
+				Matchers.hasKey(USER_NAME),
+				Matchers.hasKey(PASSWORD),
+				Matchers.hasKey(NAME),
+				Matchers.hasKey(ROLE),
+				Matchers.hasKey(ACCOUNTS)
 		));
 
 	}
@@ -68,21 +70,21 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.body(String.format("""
 						{
 						  "name": "%s"
 						}
 						""", name))
 				.when()
-				.put("http://localhost:4111/api/v1/customer/profile")
+				.put(GET_PROFILE)
 				.then()
 				.statusCode(200)
 				.body("message", Matchers.equalTo("Profile updated successfully"))
 				.body("customer", Matchers.allOf(
-						Matchers.hasEntry("username", uniqueUsername),
-						Matchers.hasEntry("name", name),
-						Matchers.hasEntry("role", "USER")
+						Matchers.hasEntry(USER_NAME, uniqueUsername),
+						Matchers.hasEntry(NAME, name),
+						Matchers.hasEntry(ROLE, "USER")
 				));
 
 	}
@@ -101,14 +103,14 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.body(String.format("""
 						{
 						  "name": "%s"
 						}
 						""", name))
 				.when()
-				.put("http://localhost:4111/api/v1/customer/profile")
+				.put(GET_PROFILE)
 				.then()
 				.statusCode(400)
 				.body(Matchers.equalTo("Name must contain two words with letters only"));

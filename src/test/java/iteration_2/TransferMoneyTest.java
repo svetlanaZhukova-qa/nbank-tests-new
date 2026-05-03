@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static iteration_2.Constants.*;
 // Перевод денег с одного аккаунта на другой
 // — Максимальная сумма: 10000
 // — Сумма должна быть положительной и не превышать баланс отправителя
@@ -60,10 +61,10 @@ public class TransferMoneyTest extends LoggerClass {
 		Response response = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, sum);
 		response.then()
 				.statusCode(HttpStatus.SC_OK)
-				.body("senderAccountId", Matchers.equalTo(idValue1))
-				.body("receiverAccountId", Matchers.equalTo(idValue2))
-				.body("message", Matchers.equalTo("Transfer successful"))
-				.body("amount", Matchers.equalTo((float)sum));
+				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idValue1))
+				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idValue2))
+				.body(MESSAGE, Matchers.equalTo("Transfer successful"))
+				.body(AMOUNT, Matchers.equalTo((float)sum));
 	}
 
 	public static Stream<Arguments> notValidSum(){
@@ -175,10 +176,10 @@ public class TransferMoneyTest extends LoggerClass {
 		Response response = AccountHelper.createTransferMoney(userToken1, idAccountFirstUser, idAccountSecondUser, 50);
 		response.then()
 				.statusCode(HttpStatus.SC_OK)
-				.body("message", Matchers.equalTo("Transfer successful"))
-				.body("senderAccountId", Matchers.equalTo(idAccountFirstUser))
-				.body("receiverAccountId", Matchers.equalTo(idAccountSecondUser))
-				.body("amount", Matchers.equalTo((float)50));
+				.body(MESSAGE, Matchers.equalTo("Transfer successful"))
+				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idAccountFirstUser))
+				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idAccountSecondUser))
+				.body(AMOUNT, Matchers.equalTo((float)50));
 
 
 	}

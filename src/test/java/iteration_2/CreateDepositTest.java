@@ -21,6 +21,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static iteration_2.Constants.BALANCE;
+import static iteration_2.Constants.ID;
+
 // Депозит денег пользователем
 // Депозит (Deposit):
 //— Максимальная сумма: 5000
@@ -47,8 +50,8 @@ public class CreateDepositTest extends LoggerClass {
 
 		response.then()
 				.statusCode(200)
-				.body("id", Matchers.equalTo(idValue))
-				.body("balance", Matchers.equalTo((float)deposit));
+				.body(ID, Matchers.equalTo(idValue))
+				.body(BALANCE, Matchers.equalTo((float)deposit));
 
 	}
 
