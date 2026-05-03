@@ -20,6 +20,8 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static iteration_2.ApiEndpoints.GET_PROFILE;
 import static iteration_2.Constants.*;
+import static iteration_2.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_200_OK;
+import static iteration_2.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_400_BR;
 
 // Изменение имени пользователя
 // Имя в профиле (name):
@@ -80,8 +82,8 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 				.put(GET_PROFILE)
 				.then()
 				.statusCode(200)
-				.body("message", Matchers.equalTo("Profile updated successfully"))
-				.body("customer", Matchers.allOf(
+				.body(MESSAGE, Matchers.equalTo(MESSAGE_FOR_UPDATE_200_OK))
+				.body(CUSTOMER, Matchers.allOf(
 						Matchers.hasEntry(USER_NAME, uniqueUsername),
 						Matchers.hasEntry(NAME, name),
 						Matchers.hasEntry(ROLE, "USER")
@@ -113,7 +115,7 @@ public class ChangeNameOfUserTest extends LoggerClass  {
 				.put(GET_PROFILE)
 				.then()
 				.statusCode(400)
-				.body(Matchers.equalTo("Name must contain two words with letters only"));
+				.body(Matchers.equalTo(MESSAGE_FOR_UPDATE_400_BR));
 
 
 	}

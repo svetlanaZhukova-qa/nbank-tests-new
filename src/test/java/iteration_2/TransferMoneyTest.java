@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static iteration_2.Constants.*;
+import static iteration_2.MessageForTransferMoneyClass.*;
 // Перевод денег с одного аккаунта на другой
 // — Максимальная сумма: 10000
 // — Сумма должна быть положительной и не превышать баланс отправителя
@@ -63,15 +64,15 @@ public class TransferMoneyTest extends LoggerClass {
 				.statusCode(HttpStatus.SC_OK)
 				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idValue1))
 				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idValue2))
-				.body(MESSAGE, Matchers.equalTo("Transfer successful"))
+				.body(MESSAGE, Matchers.equalTo(MESSAGE_CREATE_TRANSFER_SC200))
 				.body(AMOUNT, Matchers.equalTo((float)sum));
 	}
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(10001, "Transfer amount cannot exceed 10000"),
-				Arguments.of(0, "Transfer amount must be at least 0.01"),
-				Arguments.of(-1, "Transfer amount must be at least 0.01")
+				Arguments.of(10001, MESSAGE_CREATE_TRANSFER_SC400_EXCEED10000),
+				Arguments.of(0, MESSAGE_CREATE_TRANSFER_SC400_LEAST001),
+				Arguments.of(-1, MESSAGE_CREATE_TRANSFER_SC400_LEAST001)
 		);
 	}
 
@@ -141,7 +142,7 @@ public class TransferMoneyTest extends LoggerClass {
 		Response response = AccountHelper.createTransferMoney(userToken1, idAccountSecondUser, idAccountFirstUser, 50);
 		response.then()
 				.statusCode(HttpStatus.SC_FORBIDDEN)
-				.body(Matchers.equalTo("Unauthorized access to account"));
+				.body(Matchers.equalTo(MESSAGE_FOR_UNAUTHORIZED_SX403));
 
 	}
 
@@ -176,7 +177,7 @@ public class TransferMoneyTest extends LoggerClass {
 		Response response = AccountHelper.createTransferMoney(userToken1, idAccountFirstUser, idAccountSecondUser, 50);
 		response.then()
 				.statusCode(HttpStatus.SC_OK)
-				.body(MESSAGE, Matchers.equalTo("Transfer successful"))
+				.body(MESSAGE, Matchers.equalTo(MESSAGE_CREATE_TRANSFER_SC200))
 				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idAccountFirstUser))
 				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idAccountSecondUser))
 				.body(AMOUNT, Matchers.equalTo((float)50));
@@ -215,18 +216,18 @@ public class TransferMoneyTest extends LoggerClass {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.pathParam("id", idValue1)
 				.when()
 				.get("http://localhost:4111/api/v1/accounts/{id}/transactions")
 				.then()
 				.statusCode(HttpStatus.SC_OK)
 				.body("$", Matchers.hasItem(Matchers.allOf(
-						Matchers.hasKey("id"),
-						Matchers.hasKey("amount"),
-						Matchers.hasKey("type"),
-						Matchers.hasKey("timestamp"),
-						Matchers.hasKey("relatedAccountId")
+						Matchers.hasKey(ID),
+						Matchers.hasKey(AMOUNT),
+						Matchers.hasKey(TYPE),
+						Matchers.hasKey(TIMESTAMP),
+						Matchers.hasKey(RELATED_ACCOUNT_ID)
 				)));
 	}
 
@@ -250,13 +251,13 @@ public class TransferMoneyTest extends LoggerClass {
 		given()
 				.contentType(ContentType.JSON)
 				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
+				.header(HEADER_AUTHORIZATION, userToken)
 				.pathParam("id", idValueAccountUser2)
 				.when()
 				.get("http://localhost:4111/api/v1/accounts/{id}/transactions")
 				.then()
 				.statusCode(HttpStatus.SC_FORBIDDEN)
-				.body(Matchers.equalTo("You do not have permission to access this account"));
+				.body(Matchers.equalTo(MESSAGE_FOR_NOT_HAVE_PERMISSION_SX403));
 	}
 
 

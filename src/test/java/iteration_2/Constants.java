@@ -7,11 +7,6 @@ public final class Constants {
 
 
 	// response_constants
-	// Matchers.hasKey("username"),
-	//				Matchers.hasKey("password"),
-	//				Matchers.hasKey("name"),
-	//				Matchers.hasKey("role"),
-	//				Matchers.hasKey("accounts")
 	public static final String USER_NAME = "username";
 	public static final String PASSWORD = "password";
 	public static final String NAME = "name";
@@ -23,5 +18,9 @@ public final class Constants {
 	public static final String RECEIVER_ACCOUNTS_ID = "receiverAccountId";
 	public static final String MESSAGE = "message";
 	public static final String AMOUNT = "amount";
+	public static final String CUSTOMER = "customer";
+	public static final String TYPE = "type";
+	public static final String TIMESTAMP = "timestamp";
+	public static final String RELATED_ACCOUNT_ID = "relatedAccountId";
 
 }

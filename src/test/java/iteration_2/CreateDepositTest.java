@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static io.restassured.RestAssured.given;
 import static iteration_2.Constants.BALANCE;
 import static iteration_2.Constants.ID;
+import static iteration_2.MessageForCreateDepositClass.*;
 
 // Депозит денег пользователем
 // Депозит (Deposit):
@@ -58,9 +59,9 @@ public class CreateDepositTest extends LoggerClass {
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(5001, "Deposit amount cannot exceed 5000"),
-				Arguments.of(-1, "Deposit amount must be at least 0.01"),
-				Arguments.of(0, "Deposit amount must be at least 0.01")
+				Arguments.of(5001, MESSAGE_FOR_SC400_EXCEED5000),
+				Arguments.of(-1, MESSAGE_FOR_SC400_LEAST01),
+				Arguments.of(0, MESSAGE_FOR_SC400_LEAST01)
 		);
 	}
 
@@ -99,7 +100,7 @@ public class CreateDepositTest extends LoggerClass {
 
 		Response response = AccountHelper.createDeposit(userToken,10, 100);
 		response.then()
-				.body(Matchers.equalTo("Unauthorized access to account"))
+				.body(Matchers.equalTo(MESSAGE_FOR_SC403_UNAUTHORIZED))
 				.statusCode(HttpStatus.SC_FORBIDDEN);
 
 	}
@@ -127,7 +128,7 @@ public class CreateDepositTest extends LoggerClass {
 
 		Response response = AccountHelper.createDeposit(userToken, idAccountUser2, 100);
 		response.then()
-				.body(Matchers.equalTo("Unauthorized access to account"))
+				.body(Matchers.equalTo(MESSAGE_FOR_SC403_UNAUTHORIZED))
 				.statusCode(HttpStatus.SC_FORBIDDEN);
 
 	}
