@@ -8,14 +8,22 @@
     <artifactId>nbank-tests-new</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>projectlombok.org</id>
+            <url>https://repo.projectlombok.org/content/groups/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.10.0</junit.version>
+        <junit.version>5.10.3</junit.version>
     </properties>
 
     <dependencies>
+        <!-- Для IDE (аннотации) -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -23,7 +31,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <!-- JUnit 5 Jupiter API (аннотации @Test, @BeforeAll и т.д.) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -31,7 +39,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params -->
+        <!-- Для @ParameterizedTest -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
@@ -39,7 +47,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+        <!-- Движок для запуска тестов (обязательно для Maven) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -47,23 +55,36 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.20.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- Source: https://mvnrepository.com/artifact/io.rest-assured/rest-assured -->
+        <!-- REST Assured (для API тестов) -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>6.0.0</version>
+        </dependency>
+
+        <!-- Jackson (для работы с JSON) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.20.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.10.3</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.platform/junit-platform-commons -->
+        <!-- Для запуска тестов через Maven и IDE -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.10.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Не обязательна для работы, но часто используется -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-commons</artifactId>
@@ -71,13 +92,43 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- JUnit Platform Launcher (обязательно для запуска через Maven/IDE) -->
         <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>1.10.0</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.38</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
