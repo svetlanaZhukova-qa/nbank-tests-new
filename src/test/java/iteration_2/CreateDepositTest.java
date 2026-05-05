@@ -1,6 +1,9 @@
 package iteration_2;
 
 import io.restassured.response.Response;
+import iteration_2.logger.LoggerClass;
+import iteration_2.object_helper.AccountHelper;
+import iteration_2.object_helper.UserHelper;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +16,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
-import static iteration_2.Constants.BALANCE;
-import static iteration_2.Constants.ID;
-import static iteration_2.MessageForCreateDepositClass.*;
+import static iteration_2.constants.Constants.BALANCE;
+import static iteration_2.constants.Constants.ID;
+import static iteration_2.message.MessageForCreateDepositClass.*;
 
 // Депозит денег пользователем
 // Депозит (Deposit):

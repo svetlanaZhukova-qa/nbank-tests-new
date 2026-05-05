@@ -1,6 +1,9 @@
 package iteration_2;
 
 import io.restassured.http.ContentType;
+import iteration_2.logger.LoggerClass;
+import iteration_2.object_helper.UserHelper;
+import iteration_2.specs.RequestSpec;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -9,16 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import static io.restassured.RestAssured.given;
-import static iteration_2.ApiEndpoints.GET_PROFILE;
-import static iteration_2.Constants.*;
-import static iteration_2.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_200_OK;
-import static iteration_2.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_400_BR;
+import static iteration_2.api.ApiEndpoints.GET_PROFILE;
+import static iteration_2.constants.Constants.*;
+import static iteration_2.message.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_200_OK;
+import static iteration_2.message.MessagesForChangeOfUserNameClass.MESSAGE_FOR_UPDATE_400_BR;
 
 // Изменение имени пользователя
 // Имя в профиле (name):
 //— Два слова, состоящее из букв, разделенные пробелом
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
-public class ChangeNameOfUserTest extends LoggerClass  {
+public class ChangeNameOfUserTest extends LoggerClass {
 
 	@Test
 	@Tag("positive")

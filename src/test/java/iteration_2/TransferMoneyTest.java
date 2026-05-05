@@ -2,6 +2,10 @@ package iteration_2;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import iteration_2.logger.LoggerClass;
+import iteration_2.object_helper.AccountHelper;
+import iteration_2.object_helper.UserHelper;
+import iteration_2.specs.RequestSpec;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +19,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
-import static iteration_2.Constants.*;
-import static iteration_2.MessageForTransferMoneyClass.*;
+import static iteration_2.constants.Constants.*;
+import static iteration_2.message.MessageForTransferMoneyClass.*;
 // Перевод денег с одного аккаунта на другой
 // — Максимальная сумма: 10000
 // — Сумма должна быть положительной и не превышать баланс отправителя

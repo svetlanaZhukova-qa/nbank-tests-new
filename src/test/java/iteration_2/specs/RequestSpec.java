@@ -1,4 +1,4 @@
-package iteration_2;
+package iteration_2.specs;
 
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;

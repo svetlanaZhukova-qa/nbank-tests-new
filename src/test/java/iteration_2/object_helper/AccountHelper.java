@@ -1,8 +1,10 @@
-package iteration_2;
+package iteration_2.object_helper;
 
 import io.restassured.response.Response;
+import iteration_2.api.ApiEndpoints;
+import iteration_2.specs.RequestSpec;
 
-import static iteration_2.Constants.HEADER_AUTHORIZATION;
+import static iteration_2.constants.Constants.HEADER_AUTHORIZATION;
 
 public class AccountHelper {
 	private AccountHelper() {

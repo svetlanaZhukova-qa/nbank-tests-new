@@ -1,4 +1,4 @@
-package iteration_2;
+package iteration_2.api;
 
 public class ApiEndpoints {
 	private ApiEndpoints() {

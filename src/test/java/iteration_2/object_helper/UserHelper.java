@@ -1,10 +1,12 @@
-package iteration_2;
+package iteration_2.object_helper;
 
+import iteration_2.api.ApiEndpoints;
+import iteration_2.specs.RequestSpec;
 import org.apache.http.HttpStatus;
 
 import java.util.UUID;
 
-import static iteration_2.Constants.HEADER_AUTHORIZATION;
+import static iteration_2.constants.Constants.HEADER_AUTHORIZATION;
 
 public class UserHelper {
 
