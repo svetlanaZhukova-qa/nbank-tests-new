@@ -1,13 +1,9 @@
 package iteration_2;
 
-import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -16,7 +12,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -27,7 +22,7 @@ import static io.restassured.RestAssured.given;
 //— Сумма должна быть положительной
 //— Нельзя делать депозит в чужой аккаунт или несуществующий
 @DisplayName("Тесты на проверку возможности создания Депозита")
-public class CreateDepositTest extends LoggerClass {
+public class CreateDepositTest {
 
 
 	@ParameterizedTest
@@ -53,6 +48,17 @@ public class CreateDepositTest extends LoggerClass {
 				.post("http://localhost:4111/api/v1/admin/users")
 				.then()
 				.statusCode(HttpStatus.SC_CREATED);
+
+		// 	CreateUserRequest createUserRequest = CreateUserRequest.builder()
+		//				.username(RandomData.getUsername())
+		//				.password(RandomData.getPassword())
+		//				.role(UserRole.USER.toString())
+		//				.build();
+		//
+		//		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(),
+		//				ResponseSpecs.entityWasCreated())
+		//				.post(createUserRequest).extract().as(CreateUserResponse.class);
+
 
 		// получаем токен пользователя
 		String userToken = given()
