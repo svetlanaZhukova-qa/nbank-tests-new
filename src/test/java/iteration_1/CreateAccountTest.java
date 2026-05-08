@@ -1,4 +1,4 @@
-package iteration1;
+package iteration_1;
 
 import iteration_1.generators.RandomData;
 import iteration_1.BaseTest;
@@ -14,12 +14,14 @@ public class CreateAccountTest extends BaseTest {
 
 	@Test
 	public void userCanCreateAccountTest() {
+		// создаем пользователя
 		CreateUserRequest userRequest = CreateUserRequest.builder()
 				.username(RandomData.getUsername())
 				.password(RandomData.getPassword())
 				.role(UserRole.USER.toString())
 				.build();
 
+		//
 		new AdminCreateUserRequester(
 				RequestSpecs.adminSpec(),
 				ResponseSpecs.entityWasCreated())
