@@ -323,7 +323,6 @@ public class TransferMoneyTest extends BaseTest {
 		// создаем счет ко второму юзеру
 		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.entityWasCreated())
 				.postApi(null).extract().as(CreateAccountResponse.class);
-		int idValueAccountUser2 = createAccountResponse2.getId();
 		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
 		String errorMessage = new UserLookTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
 				.getApi(createAccountResponse2.getId()).extract().asString();

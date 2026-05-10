@@ -35,4 +35,10 @@ public class AdminCreateUserRequester extends Request<CreateUserRequest>{
 		// TODO: Реализовать логику GET-запроса, когда потребуется
 		return null;
 	}
+
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return null;
+	}
 }

@@ -1,6 +1,12 @@
 package iteration_2;
 
 import io.restassured.http.ContentType;
+import iteration_2.generators.RandomData;
+import iteration_2.models_body_JSON.CreateUserRequest;
+import iteration_2.models_body_JSON.UserRole;
+import iteration_2.requests.AdminCreateUserRequester;
+import iteration_2.specs.RequestSpecs;
+import iteration_2.specs.ResponseSpecs;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -24,41 +30,12 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь может видеть информацию о своем профиле")
 	public void userCanSeeInfoAboutTheirProfile(){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
-
-		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		CreateUserRequest createUserRequest = CreateUserRequest.builder()
+				.username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString()).build();
+		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
+				.postApi(createUserRequest);
 		// запрашиваем информацию о профиле
 		given()
 				.contentType(ContentType.JSON)

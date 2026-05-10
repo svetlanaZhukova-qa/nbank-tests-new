@@ -34,6 +34,11 @@ public class UserCreateAccountRequester extends Request{
 		return null;
 	}
 
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return null;
+	}
 
 
 }

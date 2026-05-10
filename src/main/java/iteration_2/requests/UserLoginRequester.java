@@ -37,5 +37,11 @@ public class UserLoginRequester extends Request<UserLoginAndGetTokenRequest>{
 		return null;
 	}
 
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return null;
+	}
+
 
 }

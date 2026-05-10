@@ -34,4 +34,10 @@ public class UserCreateDepositRequester extends Request<CreateDepositRequest>{
 		return null;
 	}
 
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return null;
+	}
+
 }

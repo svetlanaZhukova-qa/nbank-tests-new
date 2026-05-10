@@ -34,4 +34,10 @@ public class UserLookTransferRequester extends Request{
 				.spec(responseSpecification);
 
 	}
+
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return null;
+	}
 }
