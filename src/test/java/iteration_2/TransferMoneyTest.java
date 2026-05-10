@@ -1,16 +1,12 @@
 package iteration_2;
 
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+
 import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
 import iteration_2.requests.*;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -19,9 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-//import java.util.List;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;

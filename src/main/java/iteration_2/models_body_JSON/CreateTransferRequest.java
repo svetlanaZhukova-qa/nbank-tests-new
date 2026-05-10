@@ -10,11 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CreateTransferRequest extends BaseModel{
-	//{
-	//  "senderAccountId": 3,
-	//  "receiverAccountId": 2,
-	//  "amount": 50
-	//}
 	private int senderAccountId;
 	private int receiverAccountId;
 	private int amount;

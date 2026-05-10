@@ -14,22 +14,7 @@ public class UserLoginRequester extends Request<UserLoginAndGetTokenRequest>{
 
 	@Override
 	public ValidatableResponse postApi(UserLoginAndGetTokenRequest baseModel) {
-		// 	// получаем токен пользователя
-		// 	String userToken = given()
-		//				.contentType(ContentType.JSON)
-		//				.accept(ContentType.JSON)//"role": "USER"
-		//				.body(String.format("""
-		//						{
-		//						  "username": "%s",
-		//						  "password": "%s"
-		//						}
-		//						""", createUserRequest.getUsername(), createUserRequest.getPassword()))
-		//				.when()
-		//				.post("http://localhost:4111/api/v1/auth/login")
-		//				.then()
-		//				.statusCode(200)
-		//				.extract()
-		//				.header("Authorization");
+			// получаем токен пользователя
 
 		return given()
 				.spec(requestSpecification)

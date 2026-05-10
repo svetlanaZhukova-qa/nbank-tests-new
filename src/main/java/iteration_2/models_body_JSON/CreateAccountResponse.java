@@ -12,12 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class CreateAccountResponse extends BaseModel{
-	//{
-	//    "id": 386,
-	//    "accountNumber": "ACC386",
-	//    "balance": 0.0,
-	//    "transactions": []
-	//}
 	private int id;
 	private String accountNumber;
 	private double balance;

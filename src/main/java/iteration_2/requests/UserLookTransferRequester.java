@@ -32,23 +32,6 @@ public class UserLookTransferRequester extends Request{
 				.then()
 				.assertThat()
 				.spec(responseSpecification);
-		//  делаем запрос на отслеживание транзакций по айди аккаунта
-		//		given()
-		//				.contentType(ContentType.JSON)
-		//				.accept(ContentType.JSON)
-		//				.header("Authorization", userToken)
-		//				.pathParam("id", idValue1)
-		//				.when()
-		//				.get("http://localhost:4111/api/v1/accounts/{id}/transactions")
-		//				.then()
-		//				.statusCode(HttpStatus.SC_OK)
-		//				.body("$", Matchers.hasItem(Matchers.allOf(
-		//						Matchers.hasKey("id"),
-		//						Matchers.hasKey("amount"),
-		//						Matchers.hasKey("type"),
-		//						Matchers.hasKey("timestamp"),
-		//						Matchers.hasKey("relatedAccountId")
-		//				)));
-		//	}
+
 	}
 }
