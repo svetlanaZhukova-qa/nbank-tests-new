@@ -23,7 +23,7 @@ import static io.restassured.RestAssured.given;
 // Имя в профиле (name):
 //— Два слова, состоящее из букв, разделенные пробелом
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
-public class ChangeNameOfUserTest extends LoggerClass  {
+public class ChangeNameOfUserTest extends BaseTest  {
 
 	@Test
 	@Tag("positive")

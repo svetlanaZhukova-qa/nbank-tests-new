@@ -40,4 +40,17 @@ public class UserLoginRequester extends Request<UserLoginAndGetTokenRequest>{
 				.spec(responseSpecification);
 
 	}
+
+	/**
+	 * Этот метод не реализован, так как GET-запрос не требуется для текущей логики.
+	 * Реализация будет добавлена позже, если появится соответствующая задача.
+	 */
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi(int id) {
+		// TODO: Реализовать логику GET-запроса, когда потребуется
+		return null;
+	}
+
+
 }

@@ -1,18 +1,12 @@
 package iteration_2;
 
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import iteration_1.requests.CreateAccountRequester;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
 import iteration_2.requests.AdminCreateUserRequester;
 import iteration_2.requests.UserCreateAccountRequester;
 import iteration_2.requests.UserCreateDepositRequester;
-import iteration_2.requests.UserLoginRequester;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -20,8 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
@@ -39,7 +31,7 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
-		// создаем пользователя
+		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = CreateUserRequest.builder()
 						.username(RandomData.getRandomUserName())
 						.password(RandomData.getRandomPassword())
@@ -85,7 +77,7 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может создать депозит с суммой более 5000 за раз и меньше 0")
 	@MethodSource("notValidSum")
 	public void userCantCreateDepositWithNotValidSum(int deposit, String error){
-		// создаем пользователя
+		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = CreateUserRequest.builder()
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
@@ -119,7 +111,7 @@ public class CreateDepositTest extends BaseTest{
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить деньги на не существующий счет")
 	public void userCantCreateDepositOnNonExistAccount(){
-		// создаем пользователя
+		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = CreateUserRequest.builder()
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
@@ -144,7 +136,7 @@ public class CreateDepositTest extends BaseTest{
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить деньги на чужой счет")
 	public void userCantCreateDepositOnAnotherAccount(){
-		// создаем первого пользователя
+		// создаем первого пользователя и извлекаем токен
 		CreateUserRequest createUserRequest1 = CreateUserRequest.builder()
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
@@ -154,7 +146,7 @@ public class CreateDepositTest extends BaseTest{
 				.postApi(createUserRequest1)
 				.extract().as(CreateUserResponse.class);
 
-		// создаем второго пользователя
+		// создаем второго пользователя и извлекаем токен
 		CreateUserRequest createUserRequest2 = CreateUserRequest.builder()
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())

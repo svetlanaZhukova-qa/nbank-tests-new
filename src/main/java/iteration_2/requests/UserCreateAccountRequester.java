@@ -4,6 +4,7 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import iteration_2.models_body_JSON.BaseModel;
+import iteration_2.models_body_JSON.CreateUserRequest;
 
 import static io.restassured.RestAssured.given;
 
@@ -34,4 +35,18 @@ public class UserCreateAccountRequester extends Request{
 
 		//int idValue = response.jsonPath().getInt("id");
 	}
+
+	/**
+	 * Этот метод не реализован, так как GET-запрос не требуется для текущей логики.
+	 * Реализация будет добавлена позже, если появится соответствующая задача.
+	 */
+	@Deprecated
+	@Override
+	public ValidatableResponse getApi(int id) {
+		// TODO: Реализовать логику GET-запроса, когда потребуется
+		return null;
+	}
+
+
+
 }
