@@ -41,4 +41,10 @@ public class AdminCreateUserRequester extends Request<CreateUserRequest>{
 	public ValidatableResponse getApi() {
 		return null;
 	}
+
+	@Deprecated
+	@Override
+	public ValidatableResponse putApi(CreateUserRequest baseModel) {
+		return null;
+	}
 }

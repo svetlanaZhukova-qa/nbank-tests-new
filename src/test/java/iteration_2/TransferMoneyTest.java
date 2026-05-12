@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.restassured.RestAssured.given;
 // Перевод денег с одного аккаунта на другой
 // — Максимальная сумма: 10000
 // — Сумма должна быть положительной и не превышать баланс отправителя

@@ -41,4 +41,10 @@ public class UserCreateTransferRequester extends Request<CreateTransferRequest>{
 		return null;
 	}
 
+	@Deprecated
+	@Override
+	public ValidatableResponse putApi(CreateTransferRequest baseModel) {
+		return null;
+	}
+
 }

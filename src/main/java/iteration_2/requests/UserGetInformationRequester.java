@@ -7,41 +7,33 @@ import iteration_2.models_body_JSON.BaseModel;
 
 import static io.restassured.RestAssured.given;
 
-public class UserLookTransferRequester extends Request{
-	public UserLookTransferRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
+public class UserGetInformationRequester extends Request{
+	public UserGetInformationRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
 		super(requestSpecification, responseSpecification);
 	}
 
-	/**
-	 * Метод не реализован на бэкэнде
-	 * @param baseModel
-	 * @return
-	 */
 	@Deprecated
 	@Override
 	public ValidatableResponse postApi(BaseModel baseModel) {
 		return null;
 	}
 
-	@Override
-	public ValidatableResponse getApi(int id) {
-		return given()
-				.spec(requestSpecification)
-				.pathParam("id", id)
-				.get("/api/v1/accounts/{id}/transactions")
-				.then()
-				.assertThat()
-				.spec(responseSpecification);
-
-	}
-
 	@Deprecated
 	@Override
-	public ValidatableResponse getApi() {
+	public ValidatableResponse getApi(int id) {
 		return null;
 	}
 
-	@Deprecated
+	@Override
+	public ValidatableResponse getApi() {
+		return given()
+				.spec(requestSpecification)
+				.get("/api/v1/customer/profile")
+				.then()
+				.assertThat()
+				.spec(responseSpecification);
+	}
+
 	@Override
 	public ValidatableResponse putApi(BaseModel baseModel) {
 		return null;

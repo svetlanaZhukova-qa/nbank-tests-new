@@ -1,23 +1,20 @@
 package iteration_2;
 
-import io.restassured.http.ContentType;
 import iteration_2.generators.RandomData;
-import iteration_2.models_body_JSON.CreateUserRequest;
-import iteration_2.models_body_JSON.UserRole;
+import iteration_2.models_body_JSON.*;
 import iteration_2.requests.AdminCreateUserRequester;
+import iteration_2.requests.UserGetInformationRequester;
+import iteration_2.requests.UserPutInformationRequester;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.UUID;
-
-import static io.restassured.RestAssured.given;
 
 // Изменение имени пользователя
 // Имя в профиле (name):
@@ -37,22 +34,15 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
 				.postApi(createUserRequest);
 		// запрашиваем информацию о профиле
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.when()
-				.get("http://localhost:4111/api/v1/customer/profile")
-				.then()
-				.statusCode(HttpStatus.SC_OK)
-				.body("$",Matchers.allOf(
-				Matchers.hasKey("id"),
-				Matchers.hasKey("username"),
-				Matchers.hasKey("password"),
-				Matchers.hasKey("name"),
-				Matchers.hasKey("role"),
-				Matchers.hasKey("accounts")
-		));
+		InfoGetUserResponse infoUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk())
+				.getApi().extract().as(InfoGetUserResponse.class);
+
+		softly.assertThat(infoUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
+		softly.assertThat(infoUserResponse.getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
+		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
+
 
 	}
 
@@ -62,61 +52,23 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь может меня свое имя в профиле")
 	public void userCanChangeTheirNameWithCorrectData(String name){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
+		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString()).build();
+		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
+				.postApi(createUserRequest).extract().as(CreateUserResponse.class);
 
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
 
-		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
-		// меняем имя
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "name": "%s"
-						}
-						""", name))
-				.when()
-				.put("http://localhost:4111/api/v1/customer/profile")
-				.then()
-				.statusCode(200)
-				.body("message", Matchers.equalTo("Profile updated successfully"))
-				.body("customer", Matchers.allOf(
-						Matchers.hasEntry("username", uniqueUsername),
-						Matchers.hasEntry("name", name),
-						Matchers.hasEntry("role", "USER")
-				));
+//		// меняем имя
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
+		InfoPutUserResponse infoPutUserResponse = new UserPutInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(),
+				createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
+				.putApi(infoPutUserRequest).extract().as(InfoPutUserResponse.class);
+		softly.assertThat(infoPutUserResponse.getMessage()).isEqualTo("Profile updated successfully");
+		softly.assertThat(infoPutUserResponse.getCustomer().getName()).isEqualTo(name);
+		softly.assertThat(infoPutUserResponse.getCustomer().getUsername()).isEqualTo(createUserRequest.getUsername());
+		softly.assertThat(infoPutUserResponse.getCustomer().getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
+		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
 
 	}
 
@@ -126,61 +78,80 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь не может меня свое имя в профиле с некорректными данными")
 	public void userCantChangeTheirNameWithNotCorrectData(String name){
 		// создаем пользователя
-		String uniqueUsername = "User_" + UUID.randomUUID().toString().substring(0, 8);
-
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.header("Authorization", "Basic YWRtaW46YWRtaW4=")
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""",uniqueUsername ))
-				.when()
-				.post("http://localhost:4111/api/v1/admin/users")
-				.then()
-				.statusCode(HttpStatus.SC_CREATED);
-
-		// получаем токен пользователя
-		String userToken = given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.JSON)
-				.body(String.format("""
-						{
-						  "username": "%s",
-						  "password": "verysTRongPassword33$",
-						  "role": "USER"
-						}
-						""", uniqueUsername))
-				.when()
-				.post("http://localhost:4111/api/v1/auth/login")
-				.then()
-				.statusCode(200)
-				.extract()
-				.header("Authorization");
+		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString())
+				.build();
+	new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
+			.postApi(createUserRequest);
 
 		// меняем имя
-		given()
-				.contentType(ContentType.JSON)
-				.accept(ContentType.TEXT)
-				.header("Authorization", userToken)
-				.body(String.format("""
-						{
-						  "name": "%s"
-						}
-						""", name))
-				.when()
-				.put("http://localhost:4111/api/v1/customer/profile")
-				.then()
-				.statusCode(400)
-				.body(Matchers.equalTo("Name must contain two words with letters only"));
-
+		// InfoPutUserRequest.builder().name(name).build();
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
+		String errorMessage = new UserPutInformationRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnBadRequest())
+				.putApi(infoPutUserRequest).extract().asString();
+		softly.assertThat(errorMessage).isEqualTo("Name must contain two words with letters only");
 
 	}
 
+	@Disabled("Тест падает, потому что ждем 403,но получаем 200. Пароль можно менять одновременно с именем в профиле. Однако при попытке логиниться с этим паролем- сообщение \" \"error\": \"Invalid username or password\"\" и статус код 401.")
+	@Test
+	@Tag("negative")
+	@DisplayName("Пользователь не может менять  password вместе с name")
+	public void userCantChangeTheirPassword(){
+		// создаем пользователя
+		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString())
+				.build();
+		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
+				.postApi(createUserRequest);
+		// отправляем запрос на изменение имени
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").password(RandomData.getRandomPassword()).build();
+		InfoPutUserResponse infoPutUserResponse = new UserPutInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnForbidden()).putApi(infoPutUserRequest).extract().as(InfoPutUserResponse.class);
+		softly.assertThat(createUserRequest.getPassword()).isEqualTo(infoPutUserResponse.getCustomer().getPassword());
+	}
+
+
+	@Disabled("Тест падает, потому что ждем 403,но получаем 200. При этом username не меняется.")
+	@Test
+	@Tag("negative")
+	@DisplayName("Пользователь не может менять  username вместе с name")
+	public void userCantChangeTheirUserName(){
+		// создаем пользователя
+		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString())
+				.build();
+		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
+				.postApi(createUserRequest);
+		// отправляем запрос на изменение имени
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").username(RandomData.getRandomUserName()).build();
+		InfoPutUserResponse infoPutUserResponse = new UserPutInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnForbidden()).putApi(infoPutUserRequest).extract().as(InfoPutUserResponse.class);
+		softly.assertThat(createUserRequest.getUsername()).isEqualTo(infoPutUserResponse.getCustomer().getUsername());
+
+	}
+
+	@Disabled("Тест падает, потому что ждем 403,но получаем 200.Но по факту роль не изменилась. ")
+	@Tag("negative")
+	@DisplayName("Пользователь не может менять  role вместе с name")
+	public void userCantChangeTheirRole(){
+		// создаем пользователя
+		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString())
+				.build();
+		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
+				.postApi(createUserRequest);
+		// отправляем запрос на изменение имени
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").role(UserRole.ADMIN).build();
+		InfoPutUserResponse infoPutUserResponse = new UserPutInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnForbidden()).putApi(infoPutUserRequest).extract().as(InfoPutUserResponse.class);
+		softly.assertThat(createUserRequest.getRole().toString()).isEqualTo(infoPutUserResponse.getCustomer().getRole().toString());
+	}
 
 
 }

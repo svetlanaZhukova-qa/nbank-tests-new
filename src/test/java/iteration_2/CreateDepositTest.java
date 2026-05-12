@@ -15,8 +15,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
 // Депозит денег пользователем
 // Депозит (Deposit):
 //— Максимальная сумма: 5000

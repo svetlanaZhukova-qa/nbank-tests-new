@@ -17,4 +17,5 @@ public abstract class Request<T extends BaseModel> {
 	public abstract ValidatableResponse postApi(T baseModel);
 	public abstract ValidatableResponse getApi(int id);
 	public abstract ValidatableResponse getApi();
+	public abstract ValidatableResponse putApi(T baseModel);
 }
