@@ -5,7 +5,7 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import iteration_2.models_body_JSON.UserLoginAndGetTokenRequest;
+import iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
 import iteration_2.requests.UserLoginRequester;
 
 import java.util.List;

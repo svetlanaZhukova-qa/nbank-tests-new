@@ -1,6 +1,7 @@
-package iteration_2.models_body_JSON;
+package iteration_2.models_body_JSON.change_name_user;
 
 import iteration_2.data.Account;
+import iteration_2.models_body_JSON.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

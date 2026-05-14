@@ -3,7 +3,7 @@ package iteration_2.requests;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import iteration_2.models_body_JSON.CreateTransferRequest;
+import iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
 
 import static io.restassured.RestAssured.given;
 

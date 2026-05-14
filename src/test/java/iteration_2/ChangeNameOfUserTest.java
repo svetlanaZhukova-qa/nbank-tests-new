@@ -2,6 +2,11 @@ package iteration_2;
 
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
+import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
+import iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
+import iteration_2.models_body_JSON.change_name_user.InfoPutUserResponse;
+import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
+import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.AdminCreateUserRequester;
 import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.requests.UserPutInformationRequester;

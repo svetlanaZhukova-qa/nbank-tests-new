@@ -1,5 +1,6 @@
-package iteration_2.models_body_JSON;
+package iteration_2.models_body_JSON.change_name_user;
 
+import iteration_2.data.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateTransferResponse {
-	private int receiverAccountId;
-	private int senderAccountId;
+public class InfoPutUserResponse {
 	private String message;
-	private double amount;
+	private Customer customer;
 }
