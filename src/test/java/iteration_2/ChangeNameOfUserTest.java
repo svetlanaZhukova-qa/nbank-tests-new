@@ -48,6 +48,8 @@ public class ChangeNameOfUserTest extends LoggerClass {
 				Matchers.hasKey(ACCOUNTS)
 		));
 
+
+
 	}
 
 	@ParameterizedTest
@@ -78,6 +80,15 @@ public class ChangeNameOfUserTest extends LoggerClass {
 						Matchers.hasEntry(NAME, name),
 						Matchers.hasEntry(ROLE, "USER")
 				));
+		// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body("name", Matchers.equalTo(name));
 
 	}
 

@@ -64,6 +64,18 @@ public class TransferMoneyTest extends LoggerClass {
 				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idValue2))
 				.body(MESSAGE, Matchers.equalTo(MESSAGE_CREATE_TRANSFER_SC200))
 				.body(AMOUNT, Matchers.equalTo((float)sum));
+
+		// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue2), Matchers.equalTo((float)sum))
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue1), Matchers.equalTo((float)10000 - sum));
+
 	}
 
 	public static Stream<Arguments> notValidSum(){
@@ -225,6 +237,17 @@ public class TransferMoneyTest extends LoggerClass {
 						Matchers.hasKey(TIMESTAMP),
 						Matchers.hasKey(RELATED_ACCOUNT_ID)
 				)));
+
+		// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue2), Matchers.equalTo((float)50))
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue1), Matchers.equalTo((float)4949));
 	}
 
 	@Test

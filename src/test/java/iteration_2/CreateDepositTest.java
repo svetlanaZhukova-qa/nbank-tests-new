@@ -1,5 +1,6 @@
 package iteration_2;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import iteration_2.logger.LoggerClass;
 import iteration_2.object_helper.AccountHelper;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
+import static io.restassured.RestAssured.given;
 import static iteration_2.constants.Constants.BALANCE;
 import static iteration_2.constants.Constants.ID;
 import static iteration_2.message.MessageForCreateDepositClass.*;
@@ -48,6 +50,16 @@ public class CreateDepositTest extends LoggerClass {
 				.statusCode(200)
 				.body(ID, Matchers.equalTo(idValue))
 				.body(BALANCE, Matchers.equalTo((float)deposit));
+
+// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue), Matchers.equalTo((float)deposit));
 
 	}
 
