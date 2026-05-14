@@ -11,12 +11,12 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class Account {
-	//  "id": 4,
-	//	//            "accountNumber": "ACC4",
-	//	//            "balance": 14955.0,
-	//	//            "transactions": [
+	// "id": 4,
+	//"accountNumber": "ACC4",
+	//"balance": 14955.0,
+	//"transactions": [
 	private long id;
 	private String accountNumber;
 	private double balance;
-	private List<Transaction> transactionList;
+	private List<Transaction> transactions;
 }

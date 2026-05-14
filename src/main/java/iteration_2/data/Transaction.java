@@ -16,4 +16,5 @@ public class Transaction {
 	private String type;
 	private String timestamp;
 	private long relatedAccountId;
+
 }

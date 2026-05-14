@@ -49,12 +49,14 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
 
 
+
+
 	}
 
 	@ParameterizedTest
 	@Tag("positive")
 	@ValueSource(strings = {"S s", "Svetlana s"})
-	@DisplayName("Пользователь может меня свое имя в профиле")
+	@DisplayName("Пользователь может меня свое имя в профиле.")
 	public void userCanChangeTheirNameWithCorrectData(String name){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
@@ -74,6 +76,12 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(infoPutUserResponse.getCustomer().getUsername()).isEqualTo(createUserRequest.getUsername());
 		softly.assertThat(infoPutUserResponse.getCustomer().getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
 		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
+
+		// запрашиваем информацию о профиле
+		InfoGetUserResponse infoUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk())
+				.getApi().extract().as(InfoGetUserResponse.class);
+		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}
 

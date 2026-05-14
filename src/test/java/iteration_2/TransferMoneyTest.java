@@ -1,10 +1,14 @@
 package iteration_2;
 
 
+import io.restassured.response.Response;
+import iteration_2.data.Account;
 import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
+import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
+import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
@@ -20,8 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.w3c.dom.ls.LSException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 // Перевод денег с одного аккаунта на другой
@@ -44,7 +50,7 @@ public class TransferMoneyTest extends BaseTest {
 		.role(UserRole.USER.toString())
 		.build();
 
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
+		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
 				.postApi(createUserRequest)
 				.extract().as(CreateUserResponse.class);
 
@@ -66,13 +72,13 @@ public class TransferMoneyTest extends BaseTest {
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest1);
+		CreateDepositResponse createDepositResponse1 = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
+				.postApi(createDepositRequest1).extract().as(CreateDepositResponse.class);
 
 		// 2-ой раз на 5 000
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest2);
+		CreateDepositResponse createDepositResponse2  = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
+				.postApi(createDepositRequest2).extract().as(CreateDepositResponse.class);
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(sum).build();
@@ -83,6 +89,27 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
 		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double)sum);
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
+
+		// запрашиваем информацию профиля
+
+		InfoGetUserResponse infoGetUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk())
+				.getApi().extract().as(InfoGetUserResponse.class);
+
+softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+softly.assertThat(infoGetUserResponse.getId()).isEqualTo(createUserResponse.getId());
+softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserResponse.getPassword());
+
+List<Account> accounts = infoGetUserResponse.getAccounts();
+		Optional<Account> account1 = accounts.stream().filter(a -> a.getId() == idAccount1).findFirst();
+		softly.assertThat(account1.get().getAccountNumber()).isEqualTo(createAccountResponse1.getAccountNumber());
+		softly.assertThat(account1.get().getBalance()).isEqualTo(10000 - sum);
+		softly.assertThat(account1.get().getTransactions().size()).isEqualTo(3);
+
+		Optional<Account> account2 = accounts.stream().filter(a -> a.getId() == idAccount2).findFirst();
+		softly.assertThat(account2.get().getAccountNumber()).isEqualTo(createAccountResponse2.getAccountNumber());
+		softly.assertThat(account2.get().getBalance()).isEqualTo(sum);
+		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
 
 	}
 

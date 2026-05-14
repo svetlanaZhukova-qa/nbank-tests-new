@@ -1,7 +1,10 @@
 package iteration_2;
 
+import iteration_2.data.Account;
+import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
+import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
@@ -10,6 +13,7 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.AdminCreateUserRequester;
 import iteration_2.requests.UserCreateAccountRequester;
 import iteration_2.requests.UserCreateDepositRequester;
+import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +23,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 // Депозит денег пользователем
 // Депозит (Deposit):
@@ -63,6 +70,21 @@ public class CreateDepositTest extends BaseTest{
 
 		softly.assertThat(createDepositRequest.getId()).isEqualTo(createDepositResponse.getId());
 		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
+
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk())
+				.getApi().extract().as(InfoGetUserResponse.class);
+
+		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+
+	List<Account> accounts = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk())
+			 .getApi().extract().jsonPath().getList("accounts", Account.class);
+
+		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
+		softly.assertThat(account.get().getBalance()).isEqualTo(deposit);
+		softly.assertThat(account.get().getId()).isEqualTo(idAccount);
 
 	}
 
