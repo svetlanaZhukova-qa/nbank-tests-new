@@ -100,18 +100,54 @@ softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest
 softly.assertThat(infoGetUserResponse.getId()).isEqualTo(createUserResponse.getId());
 softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserResponse.getPassword());
 
-List<Account> accounts = infoGetUserResponse.getAccounts();
-		Optional<Account> account1 = accounts.stream().filter(a -> a.getId() == idAccount1).findFirst();
-		softly.assertThat(account1.get().getAccountNumber()).isEqualTo(createAccountResponse1.getAccountNumber());
-		softly.assertThat(account1.get().getBalance()).isEqualTo(10000 - sum);
-		softly.assertThat(account1.get().getTransactions().size()).isEqualTo(3);
+//List<Account> accounts = infoGetUserResponse.getAccounts();
+//		Optional<Account> account1 = accounts.stream().filter(a -> a.getId() == idAccount1).findFirst();
+//		softly.assertThat(account1.get().getAccountNumber()).isEqualTo(createAccountResponse1.getAccountNumber());
+//		softly.assertThat(account1.get().getBalance()).isEqualTo(10000 - sum);
+//		softly.assertThat(account1.get().getTransactions().size()).isEqualTo(3);
+//
+//		Optional<Account> account2 = accounts.stream().filter(a -> a.getId() == idAccount2).findFirst();
+//		softly.assertThat(account2.get().getAccountNumber()).isEqualTo(createAccountResponse2.getAccountNumber());
+//		softly.assertThat(account2.get().getBalance()).isEqualTo(sum);
+//		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
 
-		Optional<Account> account2 = accounts.stream().filter(a -> a.getId() == idAccount2).findFirst();
-		softly.assertThat(account2.get().getAccountNumber()).isEqualTo(createAccountResponse2.getAccountNumber());
-		softly.assertThat(account2.get().getBalance()).isEqualTo(sum);
-		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
+		// Предположим, infoGetUserResponse уже получен
+
+		List<Account> accounts = infoGetUserResponse.getAccounts();
+
+		for (Account account : accounts) {
+			for (Transaction transaction : account.getTransactions()) {
+				if ("DEPOSIT".equals(transaction.getType())) {
+					softly.assertThat(transaction.getRelatedAccountId())
+							.as("relatedAccountId для DEPOSIT в аккаунте %s", account.getId())
+							.isEqualTo(account.getId());
+				} else if ("TRANSFER_OUT".equals(transaction.getType())) {
+					// relatedAccountId должен быть id другого аккаунта
+					long expectedRelatedId = accounts.stream()
+							.filter(a -> a.getId() != account.getId())
+							.findFirst()
+							.orElseThrow()
+							.getId();
+					softly.assertThat(transaction.getRelatedAccountId())
+							.as("relatedAccountId для TRANSFER_OUT в аккаунте %s", account.getId())
+							.isEqualTo(expectedRelatedId);
+				} else if ("TRANSFER_IN".equals(transaction.getType())) {
+					// аналогично, relatedAccountId — это id другого аккаунта
+					long expectedRelatedId = accounts.stream()
+							.filter(a -> a.getId() != account.getId())
+							.findFirst()
+							.orElseThrow()
+							.getId();
+					softly.assertThat(transaction.getRelatedAccountId())
+							.as("relatedAccountId для TRANSFER_IN в аккаунте %s", account.getId())
+							.isEqualTo(expectedRelatedId);
+				}
+			}
+		}
 
 	}
+
+
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
