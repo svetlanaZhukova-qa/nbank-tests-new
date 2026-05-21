@@ -1,14 +1,18 @@
 package iteration_1;
 
 import iteration_1.generators.RandomData;
+import iteration_1.generators.RandomModelGenerator;
 import iteration_1.models.CreateUserRequest;
 import iteration_1.models.CreateUserResponse;
 import iteration_1.models.UserRole;
+import iteration_1.models.comparison.ModelAssertions;
+import iteration_1.requests.skelethon.Endpoint;
+import iteration_1.requests.skelethon.requestsers.CrudRequester;
+import iteration_1.requests.skelethon.requestsers.ValidateCRUDRequester;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import iteration_1.requests.AdminCreateUserRequester;
 import iteration_1.specs.RequestSpecs;
 import iteration_1.specs.ResponseSpecs;
 
@@ -17,19 +21,15 @@ import java.util.stream.Stream;
 public class CreateUserTest extends BaseTest {
 	@Test
 	public void adminCanCreateUserWithCorrectData() {
-		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-				.username(RandomData.getUsername())
-				.password(RandomData.getPassword())
-				.role(UserRole.USER.toString())
-				.build();
+		CreateUserRequest createUserRequest = RandomModelGenerator.generate(CreateUserRequest.class);
 
-		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(),
-				ResponseSpecs.entityWasCreated())
-				.post(createUserRequest).extract().as(CreateUserResponse.class);
+		CreateUserResponse createUserResponse = new ValidateCRUDRequester<CreateUserResponse>(RequestSpecs.adminSpec(),
+				ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USERS)
+				.post(createUserRequest);
 
-		softly.assertThat(createUserRequest.getUsername()).isEqualTo(createUserResponse.getUsername());
+		ModelAssertions.assertThatModels(createUserRequest, createUserResponse).match();
 		softly.assertThat(createUserRequest.getPassword()).isNotEqualTo(createUserResponse.getPassword());
-		softly.assertThat(createUserRequest.getRole()).isEqualTo(createUserResponse.getRole());
+
 	}
 
 	public static Stream<Arguments> userInvalidData() {
@@ -52,8 +52,8 @@ public class CreateUserTest extends BaseTest {
 				.role(role)
 				.build();
 
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(),
-				ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue))
+		new CrudRequester(RequestSpecs.adminSpec(),
+				ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue), Endpoint.ADMIN_USERS)
 				.post(createUserRequest);
 	}
 }
