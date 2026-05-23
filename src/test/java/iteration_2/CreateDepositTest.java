@@ -1,7 +1,6 @@
 package iteration_2;
 
 import iteration_2.data.Account;
-import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
@@ -10,10 +9,12 @@ import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
-import iteration_2.requests.AdminCreateUserRequester;
-import iteration_2.requests.UserCreateAccountRequester;
+
 import iteration_2.requests.UserCreateDepositRequester;
 import iteration_2.requests.UserGetInformationRequester;
+import iteration_2.requests.skelethon.Endpoint;
+import iteration_2.requests.skelethon.requesters.CrudRequester;
+import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -47,15 +48,14 @@ public class CreateDepositTest extends BaseTest{
 						.password(RandomData.getRandomPassword())
 						.role(UserRole.USER.toString()).build();
 
-		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest)
-				.extract().as(CreateUserResponse.class);
+
+		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER).post(createUserRequest);
+
 
 		// создаем счет
-	 CreateAccountResponse createAccountResponse = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
-			 ResponseSpecs.entityWasCreated())
-				.postApi(null)
-				.extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 	int idAccount = createAccountResponse.getId();
 
@@ -108,15 +108,13 @@ public class CreateDepositTest extends BaseTest{
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
 
-		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest)
-				.extract().as(CreateUserResponse.class);
+
+		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER).post(createUserRequest);
 
 		// создаем счет
-		CreateAccountResponse createAccountResponse = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.entityWasCreated())
-				.postApi(null)
-				.extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 		int idAccount = createAccountResponse.getId();
 
@@ -142,9 +140,10 @@ public class CreateDepositTest extends BaseTest{
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
 
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest)
-				.extract().as(CreateUserResponse.class);
+
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+
+
 
 		// переводим депозит
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(10).build();
@@ -167,9 +166,8 @@ public class CreateDepositTest extends BaseTest{
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
 
-		CreateUserResponse createUserResponse1 = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest1)
-				.extract().as(CreateUserResponse.class);
+		CreateUserResponse createUserResponse1 = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER).post(createUserRequest1);
 
 		// создаем второго пользователя и извлекаем токен
 		CreateUserRequest createUserRequest2 = CreateUserRequest.builder()
@@ -177,14 +175,12 @@ public class CreateDepositTest extends BaseTest{
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
 
-		CreateUserResponse createUserResponse2 = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest2)
-				.extract().as(CreateUserResponse.class);
+		CreateUserResponse createUserResponse2 =  new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER).post(createUserRequest2);
 
 		// создаем счет у второго пользователя
-CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserResponse2.getUsername(), createUserRequest2.getPassword()),
-		ResponseSpecs.entityWasCreated())
-		.postApi(null).extract().as(CreateAccountResponse.class);
+CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse2.getUsername(), createUserRequest2.getPassword()),
+		ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccountUser2 = createAccountResponse2.getId();
 
 		// переводим депозит под токеном первого пользователя на второй

@@ -10,6 +10,8 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.AdminCreateUserRequester;
 import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.requests.UserPutInformationRequester;
+import iteration_2.requests.skelethon.Endpoint;
+import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 
@@ -36,8 +38,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk())

@@ -1,5 +1,6 @@
 package iteration_2.requests.skelethon.requesters;
 
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import iteration_2.models_body_JSON.BaseModel;
@@ -15,7 +16,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
 	}
 
 	@Override
-	public Object post(BaseModel baseModel) {
+	public ValidatableResponse post(BaseModel baseModel) {
 		var body = baseModel == null ? "" : baseModel;
 		return given()
 				.spec(requestSpecification)

@@ -1,7 +1,6 @@
 package iteration_2;
 
 
-import io.restassured.response.Response;
 import iteration_2.data.Account;
 import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
@@ -15,6 +14,9 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
 import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
 import iteration_2.requests.*;
+import iteration_2.requests.skelethon.Endpoint;
+import iteration_2.requests.skelethon.requesters.CrudRequester;
+import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -24,10 +26,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.w3c.dom.ls.LSException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 // Перевод денег с одного аккаунта на другой
@@ -50,23 +50,20 @@ public class TransferMoneyTest extends BaseTest {
 		.role(UserRole.USER.toString())
 		.build();
 
-		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest)
-				.extract().as(CreateUserResponse.class);
+		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER).post(createUserRequest);
+
 
 		// создаем 2 счета
 		//1-ый счет
-		CreateAccountResponse createAccountResponse1 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null)
-				.extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 		int idAccount1 = createAccountResponse1.getId();
 
 		// 2-ой счет
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null)
-				.extract().as(CreateAccountResponse.class);
-
+		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccount2 = createAccountResponse2.getId();
 
 		// пополняем первый счет на 10 000
@@ -167,17 +164,16 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
 
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest).extract().as(CreateUserResponse.class);
+		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 		// создаем 2 счета
 		//1-ый счет
-		 CreateAccountResponse createAccountResponse1 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				 .postApi(null).extract().as(CreateAccountResponse.class);
+		 CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				 ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccount1 = createAccountResponse1.getId();
 
 		// 2-ой счет
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccount2 = createAccountResponse2.getId();
 
 		// пополняем первый счет на 10 000
@@ -212,21 +208,22 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		// 1-ый юзер
 		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest1);
+
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
 		// 2-ой юзер
 		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest2);
+
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
-		CreateAccountResponse createAccountResponse1 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccountFirstUser = createAccountResponse1.getId();
 		// 2-ой юзер
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
 		// 1-ый юзер
@@ -259,24 +256,24 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest1);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
+
 
 		// 2-ой юзер
 		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest2);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+
 
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
-		CreateAccountResponse createAccountResponse1 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 		int idAccountFirstUser = createAccountResponse1.getId();
 		// 2-ой юзер
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse2 =  new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
@@ -309,17 +306,16 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated()).postApi(createUserRequest);
-
+new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 		// создаем 2 счета
 		//1-ый счет
-		CreateAccountResponse createAccountResponse1 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccount1 = createAccountResponse1.getId();
 
 		// 2-ой счет
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		int idAccount2 = createAccountResponse2.getId();
 
 		// пополняем первый счет
@@ -372,25 +368,26 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 	}
 
+	@Deprecated
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
+	// раньше автотест имел зеленый статус. Поменялась логика.
 	public void userCanSeeTrackingOfOtherAccounts(){
 		// создаем юзера1 под которым будет отслеживать операции
 		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest1);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
 
 		// создаем юзера 2 у которого будем отслеживать операции
 		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest2);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+		;
 
 		// создаем счет ко второму юзеру
-		CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.entityWasCreated())
-				.postApi(null).extract().as(CreateAccountResponse.class);
+		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
+				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
 		String errorMessage = new UserLookTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
 				.getApi(createAccountResponse2.getId()).extract().asString();
