@@ -42,7 +42,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
 	public ValidatableResponse get() {
 		return given()
 				.spec(requestSpecification)
-				.get("/api/v1/customer/profile")
+				.get(endpoint.getUrl())
 				.then()
 				.assertThat()
 				.spec(responseSpecification);

@@ -15,7 +15,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Endpoint {
-	ADMIN_USER("api/v1/admin/users",
+	ADMIN_USER("/api/v1/admin/users",
 			CreateUserRequest.class,
 			CreateUserResponse.class),
 	ACCOUNT("/api/v1/accounts",

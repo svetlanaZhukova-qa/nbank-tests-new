@@ -5,8 +5,10 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
-import iteration_2.requests.UserLoginRequester;
+import iteration_2.requests.skelethon.Endpoint;
+import iteration_2.requests.skelethon.requesters.CrudRequester;
 
 import java.util.List;
 
@@ -44,8 +46,9 @@ public class RequestSpecs {
 
 	public static RequestSpecification authUserSpec(String username, String password){
 
-		String userToken = new UserLoginRequester(RequestSpecs.unAuthUserSpec(), ResponseSpecs.requestReturnOk())
-				.postApi(UserLoginAndGetTokenRequest.builder().username(username).password(password).build())
+		String userToken = new CrudRequester(RequestSpecs.unAuthUserSpec(), ResponseSpecs.requestReturnOk(),
+				Endpoint.LOGIN_USER)
+				.post(UserLoginAndGetTokenRequest.builder().username(username).password(password).build())
 				.extract()
 				.header("Authorization");
 
@@ -56,8 +59,9 @@ public class RequestSpecs {
 
 	public static RequestSpecification authUserSpecForAcceptTEXT(String username, String password){
 
-		String userToken = new UserLoginRequester(RequestSpecs.unAuthUserSpec(), ResponseSpecs.requestReturnOk())
-				.postApi(UserLoginAndGetTokenRequest.builder().username(username).password(password).build())
+		String userToken = new CrudRequester(RequestSpecs.unAuthUserSpec(), ResponseSpecs.requestReturnOk(),
+				Endpoint.LOGIN_USER)
+				.post(UserLoginAndGetTokenRequest.builder().username(username).password(password).build())
 				.extract()
 				.header("Authorization");
 
