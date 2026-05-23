@@ -12,7 +12,6 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
 import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
-import iteration_2.requests.*;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;

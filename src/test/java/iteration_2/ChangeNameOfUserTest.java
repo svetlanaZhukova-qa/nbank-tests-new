@@ -6,10 +6,6 @@ import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
 import iteration_2.models_body_JSON.change_name_user.InfoPutUserResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
-import iteration_2.requests.AdminCreateUserRequester;
-import iteration_2.requests.UserGetInformationRequester;
-import iteration_2.requests.UserPutInformationRequester;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
@@ -154,18 +150,19 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Disabled("Тест падает, потому что ждем 403,но получаем 200.Но по факту роль не изменилась. ")
 	@Tag("negative")
 	@DisplayName("Пользователь не может менять  role вместе с name")
+	@Test
 	public void userCantChangeTheirRole(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString())
 				.build();
-		new AdminCreateUserRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest);
+		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+
 		// отправляем запрос на изменение имени
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").role(UserRole.ADMIN).build();
-		InfoPutUserResponse infoPutUserResponse = new UserPutInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnForbidden()).putApi(infoPutUserRequest).extract().as(InfoPutUserResponse.class);
+		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
 		softly.assertThat(createUserRequest.getRole().toString()).isEqualTo(infoPutUserResponse.getCustomer().getRole().toString());
 	}
 

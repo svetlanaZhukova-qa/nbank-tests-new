@@ -9,7 +9,6 @@ import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
-import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
@@ -77,9 +76,9 @@ public class CreateDepositTest extends BaseTest{
 
 		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 
-	List<Account> accounts = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-			 .getApi().extract().jsonPath().getList("accounts", Account.class);
+	List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+			ResponseSpecs.requestReturnOk(),
+			Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
 		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
 		softly.assertThat(account.get().getBalance()).isEqualTo(deposit);

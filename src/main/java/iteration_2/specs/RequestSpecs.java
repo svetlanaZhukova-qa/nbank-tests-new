@@ -10,7 +10,6 @@ import iteration_2.requests.UserLoginRequester;
 
 import java.util.List;
 
-import static io.restassured.RestAssured.given;
 
 public class RequestSpecs {
 	private RequestSpecs(){}
