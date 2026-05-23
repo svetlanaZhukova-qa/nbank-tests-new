@@ -28,16 +28,25 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
 	}
 
 	@Override
-	public ValidatableResponse get(int id) {
-
+	public ValidatableResponse getWithParams(int id) {
 		return given()
 				.spec(requestSpecification)
 				.pathParam("id", id)
-				.get("/api/v1/accounts/{id}/transactions")
+				.get(endpoint.getUrl())
 				.then()
 				.assertThat()
 				.spec(responseSpecification);
 	}
+
+	@Override
+	public ValidatableResponse get() {
+		return given()
+				.spec(requestSpecification)
+				.get("/api/v1/customer/profile")
+				.then()
+				.assertThat()
+				.spec(responseSpecification);
+}
 
 	@Override
 	public Object update(long id, BaseModel baseModel) {

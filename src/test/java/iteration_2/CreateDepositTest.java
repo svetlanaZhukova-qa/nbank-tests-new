@@ -71,9 +71,9 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi().extract().as(InfoGetUserResponse.class);
+		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO).get();
 
 		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 

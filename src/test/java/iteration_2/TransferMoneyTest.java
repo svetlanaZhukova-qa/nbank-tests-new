@@ -93,9 +93,9 @@ public class TransferMoneyTest extends BaseTest {
 
 		// запрашиваем информацию профиля
 
-		InfoGetUserResponse infoGetUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi().extract().as(InfoGetUserResponse.class);
+		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO).get();
 
 softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 softly.assertThat(infoGetUserResponse.getId()).isEqualTo(createUserResponse.getId());
@@ -343,7 +343,7 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 		// делаем запрос на отслеживание транзакций по айди аккаунта
 	List<Transaction> transactions = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 			ResponseSpecs.requestReturnOk(),
-			Endpoint.LOGIN_USER).get(idAccount1).extract()
+			Endpoint.LOOK_TRANSFER).getWithParams(idAccount1).extract()
 			.jsonPath().getList("$", Transaction.class);
 
 	softly.assertThat(!transactions.isEmpty());
@@ -398,7 +398,7 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
 		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
 				ResponseSpecs.requestReturnForbidden(),
-				Endpoint.LOOK_TRANSFER).get(createAccountResponse2.getId()).extract().asString();
+				Endpoint.LOOK_TRANSFER).getWithParams(createAccountResponse2.getId()).extract().asString();
 
 		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
 

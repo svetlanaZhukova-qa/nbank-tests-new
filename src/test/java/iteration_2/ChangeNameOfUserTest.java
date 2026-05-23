@@ -12,6 +12,7 @@ import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.requests.UserPutInformationRequester;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
+import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 
@@ -38,11 +39,12 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				.username(RandomData.getRandomUserName())
 				.password(RandomData.getRandomPassword())
 				.role(UserRole.USER.toString()).build();
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER)
+				.post(createUserRequest);
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi().extract().as(InfoGetUserResponse.class);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO).get();
 
 		softly.assertThat(infoUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
@@ -79,9 +81,9 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi().extract().as(InfoGetUserResponse.class);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}

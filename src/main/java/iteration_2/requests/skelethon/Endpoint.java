@@ -1,6 +1,7 @@
 package iteration_2.requests.skelethon;
 
 import iteration_2.models_body_JSON.BaseModel;
+import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.*;
@@ -33,7 +34,11 @@ public enum Endpoint {
 	LOOK_TRANSFER(
 			"/api/v1/accounts/{id}/transactions",
 			BaseModel.class,
-			BaseModel.class);
+			BaseModel.class),
+	USER_INFO(
+			"/api/v1/customer/profile",
+			BaseModel.class,
+			InfoGetUserResponse.class);
 
 	private  final String url;
 	private final Class<? extends BaseModel> requestModel;
