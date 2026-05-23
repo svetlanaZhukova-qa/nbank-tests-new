@@ -144,14 +144,12 @@ public class CreateDepositTest extends BaseTest{
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 
 
-
 		// переводим депозит
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(10).build();
-		 String errorMessage = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				 ResponseSpecs.requestReturnForbidden())
-				 .postApi(createDepositRequest)
-				 .extract().body().asString();
-
+		 String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				 ResponseSpecs.requestReturnForbidden(),
+				 Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
+//
 		 softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
 
 	}
@@ -185,9 +183,9 @@ CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<Create
 
 		// переводим депозит под токеном первого пользователя на второй
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(idAccountUser2).build();
-		String messageError = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
-				.postApi(createDepositRequest)
-				.extract().body().asString();
+		String messageError = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(),createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden(),
+				Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
+
 		softly.assertThat(messageError).isEqualTo("Unauthorized access to account");
 
 

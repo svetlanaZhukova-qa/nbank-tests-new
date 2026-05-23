@@ -69,13 +69,16 @@ public class TransferMoneyTest extends BaseTest {
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		CreateDepositResponse createDepositResponse1 = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest1).extract().as(CreateDepositResponse.class);
+		CreateDepositResponse createDepositResponse1 = new ValidateCrudRequester2<CreateDepositResponse>(RequestSpecs.authUserSpec(
+				createUserRequest.getUsername(), createUserRequest.getPassword()
+		),ResponseSpecs.requestReturnOk(), Endpoint.DEPOSIT).post(createDepositRequest1);
+
 
 		// 2-ой раз на 5 000
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		CreateDepositResponse createDepositResponse2  = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest2).extract().as(CreateDepositResponse.class);
+		CreateDepositResponse createDepositResponse2  = new ValidateCrudRequester2<CreateDepositResponse>(RequestSpecs.authUserSpec(
+				createUserRequest.getUsername(), createUserRequest.getPassword()
+		),ResponseSpecs.requestReturnOk(), Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(sum).build();
@@ -179,13 +182,14 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest1);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest1);
+
 
 		// 2-ой раз на 5 000
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest2);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder()
@@ -228,13 +232,13 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		// пополняем каждый счет
 		// 1-ый юзер
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(500).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest1);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest1);
 
 		// 2-ой юзер
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(500).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest2);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги под одним юзером с чужого счета на его
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountSecondUser).receiverAccountId(idAccountFirstUser)
@@ -279,13 +283,13 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		// пополняем каждый счет
 		// 1-ый юзер
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(500).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest1);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest1);
 
 		// 2-ой юзер
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(500).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest2);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги под одним юзером на другой счет
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountFirstUser).receiverAccountId(idAccountSecondUser).amount(50).build();
@@ -320,8 +324,9 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 
 		// пополняем первый счет
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount1).balance(500).build();
-		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest);
+		new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT).post(createDepositRequest);
+
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(50).build();
