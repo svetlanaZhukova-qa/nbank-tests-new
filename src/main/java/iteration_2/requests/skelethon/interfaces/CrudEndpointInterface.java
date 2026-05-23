@@ -6,6 +6,6 @@ public interface CrudEndpointInterface {
 	Object post(BaseModel baseModel);
 	Object getWithParams(int id);
 	Object get();
-	Object update(long id, BaseModel baseModel);
+	Object update(BaseModel baseModel);
 	Object delete(long id);
 }
