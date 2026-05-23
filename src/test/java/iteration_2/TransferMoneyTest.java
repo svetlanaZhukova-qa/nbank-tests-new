@@ -53,7 +53,6 @@ public class TransferMoneyTest extends BaseTest {
 		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
 				Endpoint.ADMIN_USER).post(createUserRequest);
 
-
 		// создаем 2 счета
 		//1-ый счет
 		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
@@ -69,21 +68,24 @@ public class TransferMoneyTest extends BaseTest {
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
 		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		CreateDepositResponse createDepositResponse1 = new ValidateCrudRequester2<CreateDepositResponse>(RequestSpecs.authUserSpec(
+		new CrudRequester(RequestSpecs.authUserSpec(
 				createUserRequest.getUsername(), createUserRequest.getPassword()
 		),ResponseSpecs.requestReturnOk(), Endpoint.DEPOSIT).post(createDepositRequest1);
 
 
 		// 2-ой раз на 5 000
 		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
-		CreateDepositResponse createDepositResponse2  = new ValidateCrudRequester2<CreateDepositResponse>(RequestSpecs.authUserSpec(
+	new CrudRequester(RequestSpecs.authUserSpec(
 				createUserRequest.getUsername(), createUserRequest.getPassword()
 		),ResponseSpecs.requestReturnOk(), Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(sum).build();
-		CreateTransferResponse createTransferResponse = new UserCreateTransferRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
-				.postApi(createTransferRequest).extract().as(CreateTransferResponse.class);
+		CreateTransferResponse createTransferResponse = new ValidateCrudRequester2<CreateTransferResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.TRANSFER
+		).post(createTransferRequest);
 
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccount2);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
@@ -192,13 +194,13 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				Endpoint.DEPOSIT).post(createDepositRequest2);
 
 		// переводим деньги с одного счета на другой
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder()
+       CreateTransferRequest createTransferRequest =  CreateTransferRequest.builder()
 				.senderAccountId(idAccount1)
 				.receiverAccountId(idAccount2)
 				.amount(sum).build();
-		String errorMessage = new UserCreateTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnBadRequest())
-				.postApi(createTransferRequest).extract().asString();
-
+		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(
+				createUserRequest.getUsername(), createUserRequest.getPassword()
+		),ResponseSpecs.requestReturnBadRequest(), Endpoint.TRANSFER).post(createTransferRequest).extract().body().asString();
 
 		softly.assertThat(errorMessage).isEqualTo(error);
 
@@ -243,8 +245,9 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		// переводим деньги под одним юзером с чужого счета на его
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountSecondUser).receiverAccountId(idAccountFirstUser)
 				.amount(100).build();
-		String errorMessage = new UserCreateTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnForbidden())
-				.postApi(createTransferRequest).extract().asString();
+		String errorMessage =  new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(
+				createUserRequest1.getUsername(), createUserRequest1.getPassword()
+		),ResponseSpecs.requestReturnForbidden(), Endpoint.TRANSFER).post(createTransferRequest).extract().body().asString();
 
 		softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
 
@@ -293,8 +296,10 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 		// переводим деньги под одним юзером на другой счет
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountFirstUser).receiverAccountId(idAccountSecondUser).amount(50).build();
-		CreateTransferResponse createTransferResponse = new UserCreateTransferRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createTransferRequest).extract().as(CreateTransferResponse.class);
+		CreateTransferResponse createTransferResponse =  new ValidateCrudRequester2<CreateTransferResponse>(RequestSpecs.authUserSpec(
+				createUserRequest1.getUsername(), createUserRequest1.getPassword()
+		),ResponseSpecs.requestReturnOk(), Endpoint.TRANSFER).post(createTransferRequest);
+
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccountSecondUser);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccountFirstUser);
@@ -330,9 +335,10 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 
 		// переводим деньги с одного счета на другой
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(50).build();
-		CreateTransferResponse createTransferResponse = new UserCreateTransferRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
-				.postApi(createTransferRequest).extract().as(CreateTransferResponse.class);
 
+		new ValidateCrudRequester2<CreateTransferResponse>(RequestSpecs.authUserSpec(
+				createUserRequest.getUsername(), createUserRequest.getPassword()
+		),ResponseSpecs.requestReturnOk(), Endpoint.TRANSFER).post(createTransferRequest);
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта

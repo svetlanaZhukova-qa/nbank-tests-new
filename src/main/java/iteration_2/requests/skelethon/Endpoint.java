@@ -4,6 +4,8 @@ import iteration_2.models_body_JSON.BaseModel;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.*;
+import iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
+import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -23,7 +25,11 @@ public enum Endpoint {
 
 	DEPOSIT("/api/v1/accounts/deposit",
 			CreateDepositRequest.class,
-			CreateDepositResponse.class);
+			CreateDepositResponse.class),
+	TRANSFER(
+			"/api/v1/accounts/transfer",
+			CreateTransferRequest.class,
+			CreateTransferResponse.class);
 
 	private  final String url;
 	private final Class<? extends BaseModel> requestModel;
