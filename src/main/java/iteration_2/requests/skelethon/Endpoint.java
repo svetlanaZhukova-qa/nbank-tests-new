@@ -29,7 +29,11 @@ public enum Endpoint {
 	TRANSFER(
 			"/api/v1/accounts/transfer",
 			CreateTransferRequest.class,
-			CreateTransferResponse.class);
+			CreateTransferResponse.class),
+	LOOK_TRANSFER(
+			"/api/v1/accounts/{id}/transactions",
+			BaseModel.class,
+			BaseModel.class);
 
 	private  final String url;
 	private final Class<? extends BaseModel> requestModel;

@@ -7,7 +7,6 @@ import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
-import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
@@ -342,11 +341,9 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта
-	List<Transaction> transactions = new UserLookTransferRequester(
-				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi(idAccount1)
-				.extract()
+	List<Transaction> transactions = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+			ResponseSpecs.requestReturnOk(),
+			Endpoint.LOGIN_USER).get(idAccount1).extract()
 			.jsonPath().getList("$", Transaction.class);
 
 	softly.assertThat(!transactions.isEmpty());
@@ -379,11 +376,10 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 
 	}
 
-	@Deprecated
+
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
-	// раньше автотест имел зеленый статус. Поменялась логика.
 	public void userCanSeeTrackingOfOtherAccounts(){
 		// создаем юзера1 под которым будет отслеживать операции
 		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
@@ -400,8 +396,9 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 		CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
 				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
-		String errorMessage = new UserLookTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
-				.getApi(createAccountResponse2.getId()).extract().asString();
+		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.requestReturnForbidden(),
+				Endpoint.LOOK_TRANSFER).get(createAccountResponse2.getId()).extract().asString();
 
 		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
 

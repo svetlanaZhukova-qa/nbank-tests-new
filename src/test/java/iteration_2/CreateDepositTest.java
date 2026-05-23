@@ -9,8 +9,6 @@ import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
-
-import iteration_2.requests.UserCreateDepositRequester;
 import iteration_2.requests.UserGetInformationRequester;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
