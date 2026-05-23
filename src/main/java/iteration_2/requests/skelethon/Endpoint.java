@@ -1,6 +1,8 @@
 package iteration_2.requests.skelethon;
 
 import iteration_2.models_body_JSON.BaseModel;
+import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
+import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,11 @@ public enum Endpoint {
 	LOGIN_USER("/api/v1/auth/login",
 			UserLoginAndGetTokenRequest.class,
 			UserLoginAndGetTokenResponse.class
-			);
+			),
+
+	DEPOSIT("/api/v1/accounts/deposit",
+			CreateDepositRequest.class,
+			CreateDepositResponse.class);
 
 	private  final String url;
 	private final Class<? extends BaseModel> requestModel;

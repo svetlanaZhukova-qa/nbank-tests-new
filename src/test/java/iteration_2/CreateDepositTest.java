@@ -63,10 +63,11 @@ public class CreateDepositTest extends BaseTest{
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount)
 				.balance(deposit).build();
 
-		CreateDepositResponse createDepositResponse = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest)
-				.extract().as(CreateDepositResponse.class);
+		CreateDepositResponse createDepositResponse = new ValidateCrudRequester2<CreateDepositResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk(),
+				Endpoint.DEPOSIT
+		).post(createDepositRequest);
+
 
 		softly.assertThat(createDepositRequest.getId()).isEqualTo(createDepositResponse.getId());
 		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
@@ -122,10 +123,9 @@ public class CreateDepositTest extends BaseTest{
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount)
 				.balance(deposit).build();
 
-		String errorMessage = new UserCreateDepositRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserResponse.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnBadRequest())
-				.postApi(createDepositRequest)
-				.extract().body().asString();
+		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnBadRequest(),
+				Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
 
 		softly.assertThat(errorMessage).isEqualTo(error);
 	}
