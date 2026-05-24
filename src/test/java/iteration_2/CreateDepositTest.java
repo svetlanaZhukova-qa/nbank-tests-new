@@ -1,5 +1,6 @@
 package iteration_2;
 
+import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.data.Account;
 import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
@@ -11,6 +12,7 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
+import iteration_2.requests.steps.AdminSteps;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -38,19 +40,13 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
-
-
-
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
-
-		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
-				Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 
 		// создаем счет
-		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 	int idAccount = createAccountResponse.getId();
@@ -68,6 +64,7 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(createDepositRequest.getId()).isEqualTo(createDepositResponse.getId());
 		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
 
+
 		// запрашиваем информацию профиля
 		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
@@ -75,7 +72,8 @@ public class CreateDepositTest extends BaseTest{
 
 		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 
-	List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+
+		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 			ResponseSpecs.requestReturnOk(),
 			Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
@@ -100,14 +98,10 @@ public class CreateDepositTest extends BaseTest{
 	@MethodSource("notValidSum")
 	public void userCantCreateDepositWithNotValidSum(int deposit, String error){
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-
-		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
-				Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// создаем счет
-		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
 
 		int idAccount = createAccountResponse.getId();
@@ -128,10 +122,7 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может переводить деньги на не существующий счет")
 	public void userCantCreateDepositOnNonExistAccount(){
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 
 		// переводим депозит
@@ -149,10 +140,7 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может переводить деньги на чужой счет")
 	public void userCantCreateDepositOnAnotherAccount(){
 		// создаем первого пользователя и извлекаем токен
-		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		CreateUserResponse createUserResponse1 = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
-				Endpoint.ADMIN_USER).post(createUserRequest1);
+		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 
 		// создаем второго пользователя и извлекаем токен
 		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);

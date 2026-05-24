@@ -10,6 +10,7 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
+import iteration_2.requests.steps.AdminSteps;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 
@@ -32,9 +33,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь может видеть информацию о своем профиле")
 	public void userCanSeeInfoAboutTheirProfile(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER)
-				.post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
@@ -56,9 +55,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь может меня свое имя в профиле.")
 	public void userCanChangeTheirNameWithCorrectData(String name){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 	// меняем имя
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
@@ -88,8 +85,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь не может меня свое имя в профиле с некорректными данными")
 	public void userCantChangeTheirNameWithNotCorrectData(String name){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// меняем имя
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
@@ -106,8 +102,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь не может менять  password вместе с name")
 	public void userCantChangeTheirPassword(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// отправляем запрос на изменение имени
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").password(RandomData.getRandomPassword()).build();
@@ -123,8 +118,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@DisplayName("Пользователь не может менять  username вместе с name")
 	public void userCantChangeTheirUserName(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// отправляем запрос на изменение имени
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").username(RandomData.getRandomUserName()).build();
@@ -140,8 +134,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Test
 	public void userCantChangeTheirRole(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// отправляем запрос на изменение имени
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").role(UserRole.ADMIN).build();

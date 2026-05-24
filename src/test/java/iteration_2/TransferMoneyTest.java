@@ -14,6 +14,7 @@ import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
+import iteration_2.requests.steps.AdminSteps;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -158,9 +159,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	@DisplayName("Пользователь не может переводить отрицательные суммы и суммы больше 10000")
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(int sum, String error){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		// создаем 2 счета
 		//1-ый счет
 		 CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
@@ -203,13 +202,9 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	public void userCantTransferMoneyFromSomeOneAccountToHisOne(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
+		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 		// 2-ой юзер
-		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
@@ -249,13 +244,11 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	public void userCanTransferMoneyFromHisAccountToAnother(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
+		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 
 
 		// 2-ой юзер
-		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 
 
 		// создаем по 1 счету к каждому пользователю
@@ -298,8 +291,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
 	public void userCanSeeTrackingOfTheirAccounts(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
+		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		// создаем 2 счета
 		//1-ый счет
 		CreateAccountResponse createAccountResponse1 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
@@ -367,12 +359,10 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
 	public void userCanSeeTrackingOfOtherAccounts(){
 		// создаем юзера1 под которым будет отслеживать операции
-		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
+		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 
 		// создаем юзера 2 у которого будем отслеживать операции
-		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
+		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 		;
 
 		// создаем счет ко второму юзеру
@@ -386,8 +376,5 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
 
 	}
-
-
-
 
 }
