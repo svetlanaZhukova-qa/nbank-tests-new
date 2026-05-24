@@ -3,8 +3,7 @@ package iteration_2;
 
 import iteration_2.data.Account;
 import iteration_2.data.Transaction;
-import iteration_2.generators.RandomData;
-import iteration_2.models_body_JSON.*;
+import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
@@ -42,11 +41,7 @@ public class TransferMoneyTest extends BaseTest {
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой. Максимальная сумма 10000")
 	public void UserCanTransferMoneyFromOneAccountToAnother(int sum){
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-				.username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-		.role(UserRole.USER.toString())
-		.build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
 				Endpoint.ADMIN_USER).post(createUserRequest);
@@ -163,9 +158,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	@DisplayName("Пользователь не может переводить отрицательные суммы и суммы больше 10000")
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(int sum, String error){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		new CrudRequester(RequestSpecs.adminSpec(),ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 		// создаем 2 счета
@@ -210,13 +203,11 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	public void userCantTransferMoneyFromSomeOneAccountToHisOne(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
 		// 2-ой юзер
-		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
 
@@ -258,15 +249,12 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	public void userCanTransferMoneyFromHisAccountToAnother(){
 		//создаем 2 пользователя
 		// 1-ый юзер
-		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
 
 
 		// 2-ой юзер
-		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
 
 
@@ -310,9 +298,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
 	public void userCanSeeTrackingOfTheirAccounts(){
 		// создаем пользователя
-		CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
 		// создаем 2 счета
 		//1-ый счет
@@ -381,13 +367,11 @@ new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), En
 	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
 	public void userCanSeeTrackingOfOtherAccounts(){
 		// создаем юзера1 под которым будет отслеживать операции
-		CreateUserRequest createUserRequest1 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest1);
 
 		// создаем юзера 2 у которого будем отслеживать операции
-		CreateUserRequest createUserRequest2 = CreateUserRequest.builder().username(RandomData.getRandomUserName()).password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest2);
 		;
 

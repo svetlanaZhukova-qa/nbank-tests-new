@@ -1,8 +1,7 @@
 package iteration_2;
 
 import iteration_2.data.Account;
-import iteration_2.generators.RandomData;
-import iteration_2.models_body_JSON.*;
+import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
@@ -39,11 +38,11 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
+
+
+
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-						.username(RandomData.getRandomUserName())
-						.password(RandomData.getRandomPassword())
-						.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 
 		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
@@ -101,10 +100,7 @@ public class CreateDepositTest extends BaseTest{
 	@MethodSource("notValidSum")
 	public void userCantCreateDepositWithNotValidSum(int deposit, String error){
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-				.username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 
 		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
@@ -132,10 +128,7 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может переводить деньги на не существующий счет")
 	public void userCantCreateDepositOnNonExistAccount(){
 		// создаем пользователя и извлекаем токен
-		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-				.username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 
 		new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(), Endpoint.ADMIN_USER).post(createUserRequest);
@@ -156,19 +149,13 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может переводить деньги на чужой счет")
 	public void userCantCreateDepositOnAnotherAccount(){
 		// создаем первого пользователя и извлекаем токен
-		CreateUserRequest createUserRequest1 = CreateUserRequest.builder()
-				.username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest1 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		CreateUserResponse createUserResponse1 = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
 				Endpoint.ADMIN_USER).post(createUserRequest1);
 
 		// создаем второго пользователя и извлекаем токен
-		CreateUserRequest createUserRequest2 = CreateUserRequest.builder()
-				.username(RandomData.getRandomUserName())
-				.password(RandomData.getRandomPassword())
-				.role(UserRole.USER.toString()).build();
+		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 
 		CreateUserResponse createUserResponse2 =  new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
 				Endpoint.ADMIN_USER).post(createUserRequest2);
