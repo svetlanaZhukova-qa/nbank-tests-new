@@ -1,11 +1,11 @@
 package iteration_2.specs;
 
+import configs.Config;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
@@ -22,7 +22,7 @@ public class RequestSpecs {
 				.setAccept(ContentType.JSON)
 				.addFilters( List.of(new RequestLoggingFilter(),
 				new ResponseLoggingFilter()))
-				.setBaseUri("http://localhost:4111");
+				.setBaseUri(Config.getProperty("server") + Config.getProperty("apiVersion"));
 	}
 
 	private static RequestSpecBuilder defaultRequestBuilderForAcceptTEXT(){
@@ -31,7 +31,7 @@ public class RequestSpecs {
 				.setAccept(ContentType.TEXT)
 				.addFilters( List.of(new RequestLoggingFilter(),
 						new ResponseLoggingFilter()))
-				.setBaseUri("http://localhost:4111");
+				.setBaseUri(Config.getProperty("server") + Config.getProperty("apiVersion"));
 	}
 
 

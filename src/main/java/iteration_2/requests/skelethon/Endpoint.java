@@ -15,34 +15,34 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Endpoint {
-	ADMIN_USER("/api/v1/admin/users",
+	ADMIN_USER("/admin/users",
 			CreateUserRequest.class,
 			CreateUserResponse.class),
-	ACCOUNT("/api/v1/accounts",
+	ACCOUNT("/accounts",
 			BaseModel.class,
 			CreateAccountResponse.class),
-	LOGIN_USER("/api/v1/auth/login",
+	LOGIN_USER("/auth/login",
 			UserLoginAndGetTokenRequest.class,
 			UserLoginAndGetTokenResponse.class
 			),
 
-	DEPOSIT("/api/v1/accounts/deposit",
+	DEPOSIT("/accounts/deposit",
 			CreateDepositRequest.class,
 			CreateDepositResponse.class),
 	TRANSFER(
-			"/api/v1/accounts/transfer",
+			"/accounts/transfer",
 			CreateTransferRequest.class,
 			CreateTransferResponse.class),
 	LOOK_TRANSFER(
-			"/api/v1/accounts/{id}/transactions",
+			"/accounts/{id}/transactions",
 			BaseModel.class,
 			BaseModel.class),
 	USER_INFO(
-			"/api/v1/customer/profile",
+			"/customer/profile",
 			BaseModel.class,
 			InfoGetUserResponse.class),
 	USER_UPDATE(
-			"/api/v1/customer/profile",
+			"/customer/profile",
 			InfoPutUserRequest.class,
 			InfoPutUserResponse.class
 	);
