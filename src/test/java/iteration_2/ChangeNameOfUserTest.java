@@ -1,5 +1,6 @@
 package iteration_2;
 
+import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
@@ -37,9 +38,8 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
 
-		softly.assertThat(infoUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+		ModelAssertions.assertThatModels(infoUserResponse, createUserRequest).match();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
-		softly.assertThat(infoUserResponse.getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
 		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
 
 
