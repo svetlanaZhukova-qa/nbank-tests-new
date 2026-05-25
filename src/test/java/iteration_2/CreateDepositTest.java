@@ -7,8 +7,8 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
-import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
+import iteration_2.requests.steps.GetUserInfo;
 import iteration_2.requests.steps.UserCreateAccount;
 import iteration_2.requests.steps.UserCreateDeposit;
 import iteration_2.specs.RequestSpecs;
@@ -52,12 +52,9 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(pair.getRequest().getBalance()).isEqualTo((int) pair.getResponse().getBalance());
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get();
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 
 		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
-
 
 		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 			ResponseSpecs.requestReturnOk(),

@@ -1,7 +1,6 @@
 package iteration_2;
 
 import iteration_2.generators.RandomData;
-import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.*;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
@@ -11,6 +10,7 @@ import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
+import iteration_2.requests.steps.GetUserInfo;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 
@@ -35,16 +35,12 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get();
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
 
 		softly.assertThat(infoUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
 		softly.assertThat(infoUserResponse.getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
 		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
-
-
 
 
 	}
@@ -72,9 +68,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get();
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}

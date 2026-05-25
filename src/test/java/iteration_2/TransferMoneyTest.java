@@ -13,10 +13,7 @@ import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
-import iteration_2.requests.steps.AdminSteps;
-import iteration_2.requests.steps.UserCreateAccount;
-import iteration_2.requests.steps.UserCreateDeposit;
-import iteration_2.requests.steps.UserCreateTransfer;
+import iteration_2.requests.steps.*;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -74,13 +71,10 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
 
 		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 
-		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>
-				(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get();
 
-softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
 softly.assertThat(infoGetUserResponse.getId()).isEqualTo(createUserResponse.getId());
 softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserResponse.getPassword());
 
@@ -94,8 +88,6 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 //		softly.assertThat(account2.get().getAccountNumber()).isEqualTo(createAccountResponse2.getAccountNumber());
 //		softly.assertThat(account2.get().getBalance()).isEqualTo(sum);
 //		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
-
-		// Предположим, infoGetUserResponse уже получен
 
 		List<Account> accounts = infoGetUserResponse.getAccounts();
 
