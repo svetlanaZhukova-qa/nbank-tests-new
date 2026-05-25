@@ -1,19 +1,16 @@
 package iteration_2;
 
-import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.data.Account;
-import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
-import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
 import iteration_2.requests.steps.UserCreateAccount;
+import iteration_2.requests.steps.UserCreateDeposit;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -42,28 +39,17 @@ public class CreateDepositTest extends BaseTest{
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
 		// создаем пользователя и извлекаем токен
-
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
 
 		// создаем счет
 		CreateAccountResponse createAccountResponse =  UserCreateAccount.userCreateAccount(createUserRequest);
-
 	int idAccount = createAccountResponse.getId();
 
 		// переводим депозит на счет
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount)
-				.balance(deposit).build();
+		UserCreateDeposit.DepositPair pair = UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse, deposit);
 
-		CreateDepositResponse createDepositResponse = new ValidateCrudRequester2<CreateDepositResponse>(
-				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk(),
-				Endpoint.DEPOSIT
-		).post(createDepositRequest);
-
-
-		softly.assertThat(createDepositRequest.getId()).isEqualTo(createDepositResponse.getId());
-		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
-
+		softly.assertThat(pair.getRequest().getId()).isEqualTo(pair.getResponse().getId());
+		softly.assertThat(pair.getRequest().getBalance()).isEqualTo((int) pair.getResponse().getBalance());
 
 		// запрашиваем информацию профиля
 		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
