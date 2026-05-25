@@ -13,6 +13,7 @@ import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
+import iteration_2.requests.steps.UserCreateAccount;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -46,8 +47,7 @@ public class CreateDepositTest extends BaseTest{
 
 
 		// создаем счет
-		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
+		CreateAccountResponse createAccountResponse =  UserCreateAccount.userCreateAccount(createUserRequest);
 
 	int idAccount = createAccountResponse.getId();
 
@@ -101,9 +101,7 @@ public class CreateDepositTest extends BaseTest{
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// создаем счет
-		CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
-
+		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
 		int idAccount = createAccountResponse.getId();
 
 		// переводим счет на депозит
@@ -143,14 +141,11 @@ public class CreateDepositTest extends BaseTest{
 		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 
 		// создаем второго пользователя и извлекаем токен
-		CreateUserRequest createUserRequest2 = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
-
-		CreateUserResponse createUserResponse2 =  new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
-				Endpoint.ADMIN_USER).post(createUserRequest2);
+		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 
 		// создаем счет у второго пользователя
-CreateAccountResponse createAccountResponse2 = new ValidateCrudRequester2<CreateAccountResponse>(RequestSpecs.authUserSpec(createUserResponse2.getUsername(), createUserRequest2.getPassword()),
-		ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
+       CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest2);
+
 		int idAccountUser2 = createAccountResponse2.getId();
 
 		// переводим депозит под токеном первого пользователя на второй

@@ -2,7 +2,6 @@ package iteration_2.requests.steps;
 
 import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.specs.RequestSpecs;
