@@ -16,6 +16,7 @@ import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
 import iteration_2.requests.steps.UserCreateAccount;
 import iteration_2.requests.steps.UserCreateDeposit;
+import iteration_2.requests.steps.UserCreateTransfer;
 import iteration_2.specs.RequestSpecs;
 import iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
@@ -65,13 +66,7 @@ public class TransferMoneyTest extends BaseTest {
 	UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 5000);
 
 		// переводим деньги с одного счета на другой
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1)
-				.receiverAccountId(idAccount2).amount(sum).build();
-		CreateTransferResponse createTransferResponse = new ValidateCrudRequester2<CreateTransferResponse>(
-				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.TRANSFER
-		).post(createTransferRequest);
+		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, sum);
 
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccount2);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
@@ -246,10 +241,8 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 
 		// переводим деньги под одним юзером на другой счет
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountFirstUser).receiverAccountId(idAccountSecondUser).amount(50).build();
-		CreateTransferResponse createTransferResponse =  new ValidateCrudRequester2<CreateTransferResponse>(RequestSpecs.authUserSpec(
-				createUserRequest1.getUsername(), createUserRequest1.getPassword()
-		),ResponseSpecs.requestReturnOk(), Endpoint.TRANSFER).post(createTransferRequest);
+		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest1, createAccountResponse1, createAccountResponse2, 50);
+
 
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccountSecondUser);
@@ -277,11 +270,8 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, 500 );
 
 		// переводим деньги с одного счета на другой
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(50).build();
+		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, 50);
 
-		new ValidateCrudRequester2<CreateTransferResponse>(RequestSpecs.authUserSpec(
-				createUserRequest.getUsername(), createUserRequest.getPassword()
-		),ResponseSpecs.requestReturnOk(), Endpoint.TRANSFER).post(createTransferRequest);
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта
