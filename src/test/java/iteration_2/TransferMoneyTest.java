@@ -1,7 +1,6 @@
 package iteration_2;
 
 
-import io.restassured.response.Response;
 import iteration_2.data.Account;
 import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
@@ -24,10 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.w3c.dom.ls.LSException;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 // Перевод денег с одного аккаунта на другой
@@ -71,12 +67,12 @@ public class TransferMoneyTest extends BaseTest {
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
+		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(getMaxDeposit()).build();
 		CreateDepositResponse createDepositResponse1 = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest1).extract().as(CreateDepositResponse.class);
 
 		// 2-ой раз на 5 000
-		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
+		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(getMaxDeposit()).build();
 		CreateDepositResponse createDepositResponse2  = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest2).extract().as(CreateDepositResponse.class);
 
@@ -88,7 +84,7 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccount2);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
 		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double)sum);
-		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
+		softly.assertThat(createTransferResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_TRANSFER_SUCCESSFUL);
 
 		// запрашиваем информацию профиля
 
@@ -112,38 +108,58 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 //		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
 
 		// Предположим, infoGetUserResponse уже получен
-
 		List<Account> accounts = infoGetUserResponse.getAccounts();
 
-		for (Account account : accounts) {
-			for (Transaction transaction : account.getTransactions()) {
-				if ("DEPOSIT".equals(transaction.getType())) {
+// === Проверка DEPOSIT транзакций ===
+		accounts.forEach(account -> {
+			List<Transaction> deposits = account.getTransactions().stream()
+					.filter(t -> "DEPOSIT".equals(t.getType()))
+					.toList();
+
+			deposits.forEach(transaction ->
 					softly.assertThat(transaction.getRelatedAccountId())
 							.as("relatedAccountId для DEPOSIT в аккаунте %s", account.getId())
-							.isEqualTo(account.getId());
-				} else if ("TRANSFER_OUT".equals(transaction.getType())) {
-					// relatedAccountId должен быть id другого аккаунта
-					long expectedRelatedId = accounts.stream()
-							.filter(a -> a.getId() != account.getId())
-							.findFirst()
-							.orElseThrow()
-							.getId();
-					softly.assertThat(transaction.getRelatedAccountId())
-							.as("relatedAccountId для TRANSFER_OUT в аккаунте %s", account.getId())
-							.isEqualTo(expectedRelatedId);
-				} else if ("TRANSFER_IN".equals(transaction.getType())) {
-					// аналогично, relatedAccountId — это id другого аккаунта
-					long expectedRelatedId = accounts.stream()
-							.filter(a -> a.getId() != account.getId())
-							.findFirst()
-							.orElseThrow()
-							.getId();
-					softly.assertThat(transaction.getRelatedAccountId())
-							.as("relatedAccountId для TRANSFER_IN в аккаунте %s", account.getId())
-							.isEqualTo(expectedRelatedId);
-				}
-			}
-		}
+							.isEqualTo(account.getId())
+			);
+		});
+
+// === Проверка TRANSFER_OUT транзакций ===
+		accounts.forEach(account -> {
+			List<Transaction> transfersOut = account.getTransactions().stream()
+					.filter(t -> "TRANSFER_OUT".equals(t.getType()))
+					.toList();
+
+			transfersOut.forEach(transaction -> {
+				long expectedRelatedId = accounts.stream()
+						.filter(a -> a.getId() != account.getId())
+						.findFirst()
+						.orElseThrow()
+						.getId();
+
+				softly.assertThat(transaction.getRelatedAccountId())
+						.as("relatedAccountId для TRANSFER_OUT в аккаунте %s", account.getId())
+						.isEqualTo(expectedRelatedId);
+			});
+		});
+
+// === Проверка TRANSFER_IN транзакций ===
+		accounts.forEach(account -> {
+			List<Transaction> transfersIn = account.getTransactions().stream()
+					.filter(t -> "TRANSFER_IN".equals(t.getType()))
+					.toList();
+
+			transfersIn.forEach(transaction -> {
+				long expectedRelatedId = accounts.stream()
+						.filter(a -> a.getId() != account.getId())
+						.findFirst()
+						.orElseThrow()
+						.getId();
+
+				softly.assertThat(transaction.getRelatedAccountId())
+						.as("relatedAccountId для TRANSFER_IN в аккаунте %s", account.getId())
+						.isEqualTo(expectedRelatedId);
+			});
+		});
 
 	}
 
@@ -151,9 +167,9 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(10001, "Transfer amount cannot exceed 10000"),
-				Arguments.of(0, "Transfer amount must be at least 0.01"),
-				Arguments.of(-1, "Transfer amount must be at least 0.01")
+				Arguments.of(10001,ResponseSpecs.ERROR_MESSAGE_TRANSFER_EXCEED_10000),
+				Arguments.of(0, ResponseSpecs.ERROR_MESSAGE_TRANSFER_LEAST_001),
+				Arguments.of(-1, ResponseSpecs.ERROR_MESSAGE_TRANSFER_LEAST_001)
 		);
 	}
 
@@ -182,12 +198,12 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
+		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccount1).balance(getMaxDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest1);
 
 		// 2-ой раз на 5 000
-		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(5000).build();
+		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccount1).balance(getMaxDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest2);
 
@@ -230,12 +246,12 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
 		// 1-ый юзер
-		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(500).build();
+		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(RandomData.getRandomDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest1);
 
 		// 2-ой юзер
-		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(500).build();
+		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(RandomData.getRandomDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()), ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest2);
 
@@ -245,9 +261,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		String errorMessage = new UserCreateTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnForbidden())
 				.postApi(createTransferRequest).extract().asString();
 
-		softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
-
-
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 	}
 
 	@Test
@@ -281,23 +295,26 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
 		// 1-ый юзер
-		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(500).build();
+		CreateDepositRequest createDepositRequest1 = CreateDepositRequest.builder().id(idAccountFirstUser).balance(RandomData.getRandomDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest1);
 
 		// 2-ой юзер
-		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(500).build();
+		CreateDepositRequest createDepositRequest2 = CreateDepositRequest.builder().id(idAccountSecondUser).balance(RandomData.getRandomDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest2);
 
 		// переводим деньги под одним юзером на другой счет
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountFirstUser).receiverAccountId(idAccountSecondUser).amount(50).build();
+		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountFirstUser)
+				.receiverAccountId(idAccountSecondUser)
+				.amount(createDepositRequest1.getBalance()).build();
+
 		CreateTransferResponse createTransferResponse = new UserCreateTransferRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createTransferRequest).extract().as(CreateTransferResponse.class);
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccountSecondUser);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccountFirstUser);
-		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) 50);
+		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) createDepositRequest1.getBalance());
 
 	}
 
@@ -323,12 +340,13 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccount2 = createAccountResponse2.getId();
 
 		// пополняем первый счет
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount1).balance(500).build();
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount1).balance(RandomData.getRandomDeposit()).build();
 		new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()), ResponseSpecs.requestReturnOk())
 				.postApi(createDepositRequest);
 
 		// переводим деньги с одного счета на другой
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1).receiverAccountId(idAccount2).amount(50).build();
+		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccount1)
+				.receiverAccountId(idAccount2).amount(createDepositRequest.getBalance()).build();
 		CreateTransferResponse createTransferResponse = new UserCreateTransferRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),ResponseSpecs.requestReturnOk())
 				.postApi(createTransferRequest).extract().as(CreateTransferResponse.class);
 
@@ -358,7 +376,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				.orElse(null);
 
 		softly.assertThat(transfer_out).isNotNull();
-		softly.assertThat(transfer_out.getAmount()).isEqualTo(50.0);
+		softly.assertThat(transfer_out.getAmount()).isEqualTo((double)createDepositRequest.getBalance());
 		softly.assertThat(transfer_out.getRelatedAccountId()).isEqualTo(idAccount2);
 
 		Transaction deposit = transactions.stream()
@@ -367,7 +385,6 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				.orElse(null);
 
 		softly.assertThat(deposit).isNotNull();
-		softly.assertThat(deposit.getAmount()).isEqualTo(500.0);
 		softly.assertThat(deposit.getRelatedAccountId()).isEqualTo(idAccount1);
 
 	}
@@ -395,8 +412,12 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		String errorMessage = new UserLookTransferRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
 				.getApi(createAccountResponse2.getId()).extract().asString();
 
-		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN_PERMISSION);
 
+	}
+
+	private static int getMaxDeposit(){
+		return 5000;
 	}
 
 

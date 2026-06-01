@@ -1,10 +1,8 @@
 package iteration_2;
 
 import iteration_2.data.Account;
-import iteration_2.data.Transaction;
 import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.*;
-import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
@@ -23,8 +21,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 // Депозит денег пользователем
@@ -41,59 +37,76 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
-		// создаем пользователя и извлекаем токен
+		//  Создаём пользователя
 		CreateUserRequest createUserRequest = CreateUserRequest.builder()
-						.username(RandomData.getRandomUserName())
-						.password(RandomData.getRandomPassword())
-						.role(UserRole.USER.toString()).build();
+				.username(RandomData.getRandomUserName())
+				.password(RandomData.getRandomPassword())
+				.role(UserRole.USER.toString())
+				.build();
 
-		CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated())
-				.postApi(createUserRequest)
+		CreateUserResponse createUserResponse = new AdminCreateUserRequester(
+				RequestSpecs.adminSpec(),
+				ResponseSpecs.entityWasCreated()
+		).postApi(createUserRequest)
 				.extract().as(CreateUserResponse.class);
 
-		// создаем счет
-	 CreateAccountResponse createAccountResponse = new UserCreateAccountRequester(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
-			 ResponseSpecs.entityWasCreated())
-				.postApi(null)
+		// Создаём счёт
+		CreateAccountResponse createAccountResponse = new UserCreateAccountRequester(
+				RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.entityWasCreated()
+		).postApi(null)
 				.extract().as(CreateAccountResponse.class);
 
-	int idAccount = createAccountResponse.getId();
+		int idAccount = createAccountResponse.getId();
 
-		// переводим депозит на счет
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(idAccount)
-				.balance(deposit).build();
+		//  Делаем депозит
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+				.id(idAccount)
+				.balance(deposit)
+				.build();
 
-		CreateDepositResponse createDepositResponse = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.postApi(createDepositRequest)
+		CreateDepositResponse createDepositResponse = new UserCreateDepositRequester(
+				RequestSpecs.authUserSpec(createUserResponse.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk()
+		).postApi(createDepositRequest)
 				.extract().as(CreateDepositResponse.class);
 
-		softly.assertThat(createDepositRequest.getId()).isEqualTo(createDepositResponse.getId());
-		softly.assertThat(createDepositRequest.getBalance()).isEqualTo((int)createDepositResponse.getBalance());
+		softly.assertThat(createDepositRequest.getId())
+				.isEqualTo(createDepositResponse.getId());
+		softly.assertThat(createDepositRequest.getBalance())
+				.isEqualTo((int) createDepositResponse.getBalance());
 
-		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-				.getApi().extract().as(InfoGetUserResponse.class);
+		//  Проверка профиля через сериализацию (исправлено)
+		CreateUserResponse userInfo = new UserGetInformationRequester(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk()
+		).getApi()
+				.extract().as(CreateUserResponse.class);
 
-		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+		softly.assertThat(userInfo.getUsername())
+				.isEqualTo(createUserRequest.getUsername());
 
-	List<Account> accounts = new UserGetInformationRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk())
-			 .getApi().extract().jsonPath().getList("accounts", Account.class);
+		// Достаём аккаунт из списка внутри объекта
+		Optional<Account> account = userInfo.getAccounts().stream()
+				.filter(a -> a.getId() == idAccount)
+				.findFirst();
 
-		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
-		softly.assertThat(account.get().getBalance()).isEqualTo(deposit);
-		softly.assertThat(account.get().getId()).isEqualTo(idAccount);
+		softly.assertThat(account)
+				.as("Аккаунт с id=%d должен быть найден", idAccount)
+				.isPresent();
 
+		softly.assertThat(account.get().getBalance())
+				.isEqualTo(deposit);
+		softly.assertThat(account.get().getId())
+				.isEqualTo(idAccount);
 	}
 
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(5001, "Deposit amount cannot exceed 5000"),
-				Arguments.of(-1, "Deposit amount must be at least 0.01"),
-				Arguments.of(0, "Deposit amount must be at least 0.01")
+				Arguments.of(5001, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_EXCEED_5000),
+				Arguments.of(-1, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_LEAST_001),
+				Arguments.of(0, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_LEAST_001)
 		);
 	}
 
@@ -147,13 +160,13 @@ public class CreateDepositTest extends BaseTest{
 				.extract().as(CreateUserResponse.class);
 
 		// переводим депозит
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(10).build();
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(RandomData.getRandomDeposit()).id(RandomData.getRandomId()).build();
 		 String errorMessage = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				 ResponseSpecs.requestReturnForbidden())
 				 .postApi(createDepositRequest)
 				 .extract().body().asString();
 
-		 softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
+		 softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 
 	}
 
@@ -188,17 +201,13 @@ CreateAccountResponse createAccountResponse2 = new UserCreateAccountRequester(Re
 		int idAccountUser2 = createAccountResponse2.getId();
 
 		// переводим депозит под токеном первого пользователя на второй
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(idAccountUser2).build();
-		String messageError = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden())
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(RandomData.getRandomDeposit()).id(idAccountUser2).build();
+		String messageError = new UserCreateDepositRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.requestReturnForbidden())
 				.postApi(createDepositRequest)
 				.extract().body().asString();
-		softly.assertThat(messageError).isEqualTo("Unauthorized access to account");
-
+		softly.assertThat(messageError).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 
 	}
-
-
-
-
 
 }

@@ -1,5 +1,6 @@
 package iteration_2.models_body_JSON.create_user_and_accont;
 
+import iteration_2.data.Account;
 import iteration_2.models_body_JSON.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,5 +20,5 @@ public class CreateUserResponse extends BaseModel {
 	private String password;
 	private String name;
 	private String role;
-	private List<String> accounts;
+	private List<Account> accounts;
 }

@@ -104,7 +104,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		String errorMessage = new UserPutInformationRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnBadRequest())
 				.putApi(infoPutUserRequest).extract().asString();
-		softly.assertThat(errorMessage).isEqualTo("Name must contain two words with letters only");
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_NOT_VALID_NAME);
 
 	}
 
