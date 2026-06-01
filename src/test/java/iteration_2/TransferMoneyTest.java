@@ -1,0 +1,285 @@
+package iteration_2;
+
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import iteration_2.logger.LoggerClass;
+import iteration_2.object_helper.AccountHelper;
+import iteration_2.object_helper.UserHelper;
+import iteration_2.specs.RequestSpec;
+import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static iteration_2.constants.Constants.*;
+import static iteration_2.message.MessageForTransferMoneyClass.*;
+// Перевод денег с одного аккаунта на другой
+// — Максимальная сумма: 10000
+// — Сумма должна быть положительной и не превышать баланс отправителя
+// — Можно переводить между своими аккаунтами и чужими
+
+@DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
+public class TransferMoneyTest extends LoggerClass {
+
+	@ParameterizedTest
+	@ValueSource(ints = {9999, 10000})
+	@Tag("positive")
+	@DisplayName("Пользователь может переводить деньги с одного счета на другой. Максимальная сумма 10000")
+	public void UserCanTransferMoneyFromOneAccountToAnother(int sum){
+		// создаем пользователя
+		String randomUser = UserHelper.createUser();
+
+		// берем токен
+		String userToken = UserHelper.getToken(randomUser);
+		// создаем 2 счета
+		//1-ый счет
+		int idValue1 = AccountHelper.createAccount(userToken);
+		// 2-ой счет
+		int idValue2 = AccountHelper.createAccount(userToken);
+
+		// пополняем первый счет на 10 000
+		// 1-ый раз на 5 000
+		Response response1 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response1.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// 2-ой раз на 5 000
+		Response response2 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response2.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// переводим деньги с одного счета на другой
+		Response response = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, sum);
+		response.then()
+				.statusCode(HttpStatus.SC_OK)
+				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idValue1))
+				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idValue2))
+				.body(MESSAGE, Matchers.equalTo(MESSAGE_CREATE_TRANSFER_SC200))
+				.body(AMOUNT, Matchers.equalTo((float)sum));
+
+		// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue2), Matchers.equalTo((float)sum))
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue1), Matchers.equalTo((float)10000 - sum));
+
+	}
+
+	public static Stream<Arguments> notValidSum(){
+		return Stream.of(
+				Arguments.of(10001, MESSAGE_CREATE_TRANSFER_SC400_EXCEED10000),
+				Arguments.of(0, MESSAGE_CREATE_TRANSFER_SC400_LEAST001),
+				Arguments.of(-1, MESSAGE_CREATE_TRANSFER_SC400_LEAST001)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("notValidSum")
+	@Tag("negative")
+	@DisplayName("Пользователь не может переводить отрицательные суммы и суммы больше 10000")
+	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(int sum, String error){
+		// создаем пользователя
+		String randomUser = UserHelper.createUser();
+
+		// берем токен
+		String userToken = UserHelper.getToken(randomUser);
+		// создаем 2 счета
+		//1-ый счет
+		int idValue1 = AccountHelper.createAccount(userToken);
+		// 2-ой счет
+		int idValue2 = AccountHelper.createAccount(userToken);
+
+		// пополняем первый счет на 10 000
+		// 1-ый раз на 5 000
+		Response response1 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response1.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// 2-ой раз на 5 000
+		Response response2 = AccountHelper.createDeposit(userToken, idValue1, 5000);
+		response2.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// переводим деньги с одного счета на другой
+		Response response = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, sum);
+		response.then()
+				.statusCode(HttpStatus.SC_BAD_REQUEST)
+				.body(Matchers.equalTo(error));
+	}
+
+	@Test
+	@Tag("negative")
+	@DisplayName("Пользователь не может переводить деньги с чужого счета на свой собственный")
+	public void userCantTransferMoneyFromSomeOneAccountToHisOne(){
+		//создаем 2 пользователя
+		// 1-ый юзер
+		String randomUser1 = UserHelper.createUser();
+		// получаем токен пользователя
+		String userToken1 = UserHelper.getToken(randomUser1);
+		// 2-ой юзер
+		String randomUser2= UserHelper.createUser();
+		// получаем токен пользователя
+		String userToken2 = UserHelper.getToken(randomUser2);
+		// создаем по 1 счету к каждому пользователю
+		// 1-ый юзер
+		int idAccountFirstUser = AccountHelper.createAccount(userToken1);
+		// 2-ой юзер
+		int idAccountSecondUser = AccountHelper.createAccount(userToken2);
+		// пополняем каждый счет
+		// 1-ый юзер
+		Response response1 = AccountHelper.createDeposit(userToken1,idAccountFirstUser, 500 );
+		response1.then()
+				.statusCode(HttpStatus.SC_OK);
+		// 2-ой юзер
+		Response response2 = AccountHelper.createDeposit(userToken2,idAccountSecondUser, 500 );
+		response2.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// переводим деньги под одним юзером с чужого счета на его
+		Response response = AccountHelper.createTransferMoney(userToken1, idAccountSecondUser, idAccountFirstUser, 50);
+		response.then()
+				.statusCode(HttpStatus.SC_FORBIDDEN)
+				.body(Matchers.equalTo(MESSAGE_FOR_UNAUTHORIZED_SX403));
+
+	}
+
+	@Test
+	@Tag("positive")
+	@DisplayName("Пользователь может перевести деньги со своего счета на чужой счет")
+	public void userCanTransferMoneyFromHisAccountToAnother(){
+		//создаем 2 пользователя
+		// 1-ый юзер
+		String randomUser1 = UserHelper.createUser();
+		// получаем токен пользователя
+		String userToken1 = UserHelper.getToken(randomUser1);
+		// 2-ой юзер
+		String randomUser2= UserHelper.createUser();
+		// получаем токен пользователя
+		String userToken2 = UserHelper.getToken(randomUser2);
+		// создаем по 1 счету к каждому пользователю
+		// 1-ый юзер
+		int idAccountFirstUser = AccountHelper.createAccount(userToken1);
+		// 2-ой юзер
+		int idAccountSecondUser = AccountHelper.createAccount(userToken2);
+		// пополняем каждый счет
+		// 1-ый юзер
+		Response response1 = AccountHelper.createDeposit(userToken1,idAccountFirstUser, 500 );
+		response1.then()
+				.statusCode(HttpStatus.SC_OK);
+		// 2-ой юзер
+		Response response2 = AccountHelper.createDeposit(userToken2,idAccountSecondUser, 500 );
+		response2.then()
+				.statusCode(HttpStatus.SC_OK);
+		// переводим деньги под одним юзером на другой счет
+		Response response = AccountHelper.createTransferMoney(userToken1, idAccountFirstUser, idAccountSecondUser, 50);
+		response.then()
+				.statusCode(HttpStatus.SC_OK)
+				.body(MESSAGE, Matchers.equalTo(MESSAGE_CREATE_TRANSFER_SC200))
+				.body(SENDER_ACCOUNTS_ID, Matchers.equalTo(idAccountFirstUser))
+				.body(RECEIVER_ACCOUNTS_ID, Matchers.equalTo(idAccountSecondUser))
+				.body(AMOUNT, Matchers.equalTo((float)50));
+
+
+	}
+
+	@Test
+	@Tag("positive")
+	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
+	public void userCanSeeTrackingOfTheirAccounts(){
+		// создаем пользователя
+		String randomUser = UserHelper.createUser();
+
+		// берем токен
+		String userToken = UserHelper.getToken(randomUser);
+		// создаем 2 счета
+		//1-ый счет
+		int idValue1 = AccountHelper.createAccount(userToken);
+		// 2-ой счет
+		int idValue2 = AccountHelper.createAccount(userToken);
+
+		// пополняем первый счет
+		Response response = AccountHelper.createDeposit(userToken,idValue1, 4999 );
+		response.then()
+				.statusCode(HttpStatus.SC_OK);
+
+		// переводим деньги с одного счета на другой
+		Response response1 = AccountHelper.createTransferMoney(userToken, idValue1, idValue2, 50);
+		response1.then()
+				.statusCode(HttpStatus.SC_OK);
+
+
+		// берем айди аккаунта по которому был перевод
+		// делаем запрос на отслеживание транзакций по айди аккаунта
+		RequestSpec.getBaseSpec()
+				.header(HEADER_AUTHORIZATION, userToken)
+				.pathParam("id", idValue1)
+				.when()
+				.get("http://localhost:4111/api/v1/accounts/{id}/transactions")
+				.then()
+				.statusCode(HttpStatus.SC_OK)
+				.body("$", Matchers.hasItem(Matchers.allOf(
+						Matchers.hasKey(ID),
+						Matchers.hasKey(AMOUNT),
+						Matchers.hasKey(TYPE),
+						Matchers.hasKey(TIMESTAMP),
+						Matchers.hasKey(RELATED_ACCOUNT_ID)
+				)));
+
+		// проверяем через ГЕТ что ожидаемый результат достигнут
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.header("Authorization", userToken)
+				.get("http://localhost:4111/api/v1/customer/profile")// запрос информации об аккаунте
+				.then()
+				.statusCode(200)
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue2), Matchers.equalTo((float)50))
+				.body(String.format("accounts.find { it.id == %d }.balance", idValue1), Matchers.equalTo((float)4949));
+	}
+
+	@Test
+	@Tag("negative")
+	@DisplayName("Пользователь не может отслеживать статус чужих аккаунтов")
+	public void userCanSeeTrackingOfOtherAccounts(){
+		// создаем юзера1 под которым будет отслеживать операции
+		String randomUser = UserHelper.createUser();
+		// берем токен
+		String userToken = UserHelper.getToken(randomUser);
+
+		// создаем юзера 2 у которого будем отслеживать операции
+		String randomUser2 = UserHelper.createUser();
+		// берем токен
+		String userToken2 = UserHelper.getToken(randomUser2);
+
+		// создаем счет ко второму юзеру
+		int idValueAccountUser2 = AccountHelper.createAccount(userToken2);
+		// запрашиваем отслеживание операций второго юзера под токеном первого юзера
+		given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.TEXT)
+				.header(HEADER_AUTHORIZATION, userToken)
+				.pathParam("id", idValueAccountUser2)
+				.when()
+				.get("http://localhost:4111/api/v1/accounts/{id}/transactions")
+				.then()
+				.statusCode(HttpStatus.SC_FORBIDDEN)
+				.body(Matchers.equalTo(MESSAGE_FOR_NOT_HAVE_PERMISSION_SX403));
+	}
+
+
+
+
+}
