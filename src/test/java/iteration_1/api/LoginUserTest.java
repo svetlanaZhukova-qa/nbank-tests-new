@@ -1,7 +1,5 @@
-package iteration_1;
+package iteration_1.api;
 
-import iteration_1.generators.RandomData;
-import iteration_1.generators.RandomModelGenerator;
 import iteration_1.models.*;
 import iteration_1.requests.skelethon.Endpoint;
 import iteration_1.requests.skelethon.requestsers.CrudRequester;

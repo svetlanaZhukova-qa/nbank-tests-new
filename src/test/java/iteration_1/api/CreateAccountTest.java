@@ -1,9 +1,6 @@
-package iteration_1;
+package iteration_1.api;
 
-import iteration_1.generators.RandomData;
-import iteration_1.generators.RandomModelGenerator;
 import iteration_1.models.CreateUserRequest;
-import iteration_1.models.UserRole;
 import iteration_1.requests.skelethon.Endpoint;
 import iteration_1.requests.skelethon.requestsers.CrudRequester;
 import iteration_1.requests.steps.AdminSteps;
