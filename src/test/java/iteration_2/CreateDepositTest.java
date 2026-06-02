@@ -1,6 +1,8 @@
 package iteration_2;
 
+import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.data.Account;
+import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_deposit.CreateDepositRequest;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
@@ -53,8 +55,7 @@ public class CreateDepositTest extends BaseTest{
 
 		// запрашиваем информацию профиля
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-
-		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
+		ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest ).match();
 
 		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 			ResponseSpecs.requestReturnOk(),
@@ -69,9 +70,9 @@ public class CreateDepositTest extends BaseTest{
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(5001, "Deposit amount cannot exceed 5000"),
-				Arguments.of(-1, "Deposit amount must be at least 0.01"),
-				Arguments.of(0, "Deposit amount must be at least 0.01")
+				Arguments.of(5001, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_EXCEED_5000),
+				Arguments.of(-1, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_LEAST_001),
+				Arguments.of(0, ResponseSpecs.ERROR_MESSAGE_DEPOSIT_LEAST_001)
 		);
 	}
 
@@ -96,6 +97,13 @@ public class CreateDepositTest extends BaseTest{
 				Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
 
 		softly.assertThat(errorMessage).isEqualTo(error);
+
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		double balance = infoGetUserResponse.getAccounts().get(0).getBalance();
+		softly.assertThat(balance == 0);
+
+		//ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest ).match();
 	}
 
 	@Test
@@ -107,12 +115,15 @@ public class CreateDepositTest extends BaseTest{
 
 
 		// переводим депозит
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(10).build();
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(RandomData.getRandomDeposit()).id(RandomData.getRandomIdAccount()).build();
 		 String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				 ResponseSpecs.requestReturnForbidden(),
 				 Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
 //
-		 softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
+		 softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoGetUserResponse.getAccounts().isEmpty());
 
 	}
 
@@ -132,17 +143,14 @@ public class CreateDepositTest extends BaseTest{
 		int idAccountUser2 = createAccountResponse2.getId();
 
 		// переводим депозит под токеном первого пользователя на второй
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(500).id(idAccountUser2).build();
+		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(RandomData.getRandomDeposit()).id(idAccountUser2).build();
 		String messageError = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest1.getUsername(),createUserRequest1.getPassword()), ResponseSpecs.requestReturnForbidden(),
 				Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
 
-		softly.assertThat(messageError).isEqualTo("Unauthorized access to account");
+		softly.assertThat(messageError).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 
-
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest2);
+		softly.assertThat(infoGetUserResponse.getAccounts().get(0).getBalance() == 0);
 	}
-
-
-
-
-
 }

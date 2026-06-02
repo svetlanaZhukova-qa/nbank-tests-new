@@ -19,7 +19,12 @@ public class ModelAssertions extends AbstractAssert<ModelAssertions, Object> {
 
 	public ModelAssertions match() {
 		ModelComparisonConfigLoader configLoader = new ModelComparisonConfigLoader("model-comparison.properties");
-		ModelComparisonConfigLoader.ComparisonRule rule = configLoader.getRuleFor(request.getClass());
+
+		// Передаём ОБА класса для поиска правила
+		ModelComparisonConfigLoader.ComparisonRule rule = configLoader.getRuleFor(
+				request.getClass(),
+				response.getClass()
+		);
 
 		if (rule != null) {
 			ModelComparator.ComparisonResult result = ModelComparator.compareFields(
@@ -32,7 +37,11 @@ public class ModelAssertions extends AbstractAssert<ModelAssertions, Object> {
 				failWithMessage("Model comparison failed with mismatched fields:\n%s", result);
 			}
 		} else {
-			failWithMessage("No comparison rule found for class %s", request.getClass().getSimpleName());
+			failWithMessage(
+					"No comparison rule found for %s -> %s",
+					request.getClass().getSimpleName(),
+					response.getClass().getSimpleName()
+			);
 		}
 
 		return this;

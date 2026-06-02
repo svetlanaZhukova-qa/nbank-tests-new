@@ -1,5 +1,6 @@
 package iteration_2.models_body_JSON.change_name_user;
 
+import iteration_2.generators.GenerateRules;
 import iteration_2.models_body_JSON.BaseModel;
 import iteration_2.models_body_JSON.UserRole;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class InfoPutUserRequest extends BaseModel {
+
 	private String name;
 	private String username;
 	private String password;

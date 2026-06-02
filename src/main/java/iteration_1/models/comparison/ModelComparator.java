@@ -12,8 +12,8 @@ public class ModelComparator {
 		List<Mismatch> mismatches = new ArrayList<>();
 
 		for (Map.Entry<String, String> entry : fieldMappings.entrySet()) {
-			String requestField = entry.getKey();
-			String responseField = entry.getValue();
+			String requestField = entry.getKey().trim();
+			String responseField = entry.getValue().trim();
 
 			Object value1 = getFieldValue(request, requestField);
 			Object value2 = getFieldValue(response, responseField);
@@ -26,7 +26,28 @@ public class ModelComparator {
 		return new ComparisonResult(mismatches);
 	}
 
-	private static Object getFieldValue(Object obj, String fieldName) {
+	/**
+	 * Поддержка nested-полей через точку: "customer.username" → obj.customer.username
+	 */
+	private static Object getFieldValue(Object obj, String fieldPath) {
+		if (obj == null) {
+			return null;
+		}
+
+		String[] fields = fieldPath.split("\\.");
+		Object current = obj;
+
+		for (String fieldName : fields) {
+			if (current == null) {
+				return null;
+			}
+			current = getSingleFieldValue(current, fieldName);
+		}
+
+		return current;
+	}
+
+	private static Object getSingleFieldValue(Object obj, String fieldName) {
 		Class<?> clazz = obj.getClass();
 		while (clazz != null) {
 			try {
@@ -39,7 +60,10 @@ public class ModelComparator {
 				throw new RuntimeException("Cannot access field: " + fieldName, e);
 			}
 		}
-		throw new RuntimeException("Field not found: " + fieldName + " in class " + obj.getClass().getName());
+		throw new RuntimeException(
+				"Field not found: " + fieldName + " in class " + obj.getClass().getName() +
+						" (object value: " + obj + ")"
+		);
 	}
 
 	public static class ComparisonResult {

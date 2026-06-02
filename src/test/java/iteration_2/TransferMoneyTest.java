@@ -1,8 +1,10 @@
 package iteration_2;
 
 
+import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.data.Account;
 import iteration_2.data.Transaction;
+import iteration_2.generators.RandomData;
 import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
@@ -57,10 +59,10 @@ public class TransferMoneyTest extends BaseTest {
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 5000);
+		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, getMaxDeposit());
 
 		// 2-ой раз на 5 000
-	UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 5000);
+	UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, getMaxDeposit());
 
 		// переводим деньги с одного счета на другой
 		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, sum);
@@ -68,15 +70,12 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccount2);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
 		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double)sum);
-		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
+		softly.assertThat(createTransferResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_TRANSFER_SUCCESSFUL);
 
 		// запрашиваем информацию профиля
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-
-
-		softly.assertThat(infoGetUserResponse.getUsername()).isEqualTo(createUserRequest.getUsername());
-softly.assertThat(infoGetUserResponse.getId()).isEqualTo(createUserResponse.getId());
-softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserResponse.getPassword());
+		ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest).match();
+		ModelAssertions.assertThatModels(infoGetUserResponse,createUserResponse).match();
 
 //List<Account> accounts = infoGetUserResponse.getAccounts();
 //		Optional<Account> account1 = accounts.stream().filter(a -> a.getId() == idAccount1).findFirst();
@@ -127,9 +126,9 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
-				Arguments.of(10001, "Transfer amount cannot exceed 10000"),
-				Arguments.of(0, "Transfer amount must be at least 0.01"),
-				Arguments.of(-1, "Transfer amount must be at least 0.01")
+				Arguments.of(10001, ResponseSpecs.ERROR_MESSAGE_TRANSFER_EXCEED_10000),
+				Arguments.of(0, ResponseSpecs.ERROR_MESSAGE_TRANSFER_LEAST_001),
+				Arguments.of(-1, ResponseSpecs.ERROR_MESSAGE_TRANSFER_LEAST_001)
 		);
 	}
 
@@ -151,10 +150,10 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 
 		// пополняем первый счет на 10 000
 		// 1-ый раз на 5 000
-		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, 5000 );
+		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, getMaxDeposit() );
 
 		// 2-ой раз на 5 000
-		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, 5000 );
+		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, getMaxDeposit() );
 
 		// переводим деньги с одного счета на другой
        CreateTransferRequest createTransferRequest =  CreateTransferRequest.builder()
@@ -166,6 +165,11 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		),ResponseSpecs.requestReturnBadRequest(), Endpoint.TRANSFER).post(createTransferRequest).extract().body().asString();
 
 		softly.assertThat(errorMessage).isEqualTo(error);
+
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoGetUserResponse.getAccounts().get(1).getBalance() == 0);
+		softly.assertThat(infoGetUserResponse.getAccounts().get(0).getBalance() == getMaxDeposit() * 2);
 
 	}
 
@@ -188,20 +192,28 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
 		// 1-ый юзер
-		UserCreateDeposit.createDeposit(createUserRequest1,createAccountResponse1, 500 );
+		double balance1 = UserCreateDeposit.createDeposit(createUserRequest1,createAccountResponse1, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 		// 2-ой юзер
-		UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, 500 );
+		double balance2 = UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 
 		// переводим деньги под одним юзером с чужого счета на его
-		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountSecondUser).receiverAccountId(idAccountFirstUser)
-				.amount(100).build();
+		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountSecondUser)
+				.receiverAccountId(idAccountFirstUser)
+				.amount((int)createAccountResponse2.getBalance()).build();
 		String errorMessage =  new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(
 				createUserRequest1.getUsername(), createUserRequest1.getPassword()
 		),ResponseSpecs.requestReturnForbidden(), Endpoint.TRANSFER).post(createTransferRequest).extract().body().asString();
 
-		softly.assertThat(errorMessage).isEqualTo("Unauthorized access to account");
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN );
+
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse1 = GetUserInfo.getInfo(createUserRequest1);// получатель
+		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == balance2);
+
+		InfoGetUserResponse infoGetUserResponse2 = GetUserInfo.getInfo(createUserRequest2);// отправитель
+		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() == balance1);
 
 
 	}
@@ -226,20 +238,28 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccountSecondUser = createAccountResponse2.getId();
 		// пополняем каждый счет
 		// 1-ый юзер
-		UserCreateDeposit.createDeposit(createUserRequest1,createAccountResponse1, 500 );
+		int sum1 = (int)UserCreateDeposit.createDeposit(createUserRequest1,createAccountResponse1, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 		// 2-ой юзер
-		UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, 500 );
+		int sum2 = (int)UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 
 		// переводим деньги под одним юзером на другой счет
-		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest1, createAccountResponse1, createAccountResponse2, 50);
+		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest1,
+				createAccountResponse1, createAccountResponse2,
+				sum1);
 
-
-		softly.assertThat(createTransferResponse.getMessage()).isEqualTo("Transfer successful");
+		softly.assertThat(createTransferResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_TRANSFER_SUCCESSFUL);
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccountSecondUser);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccountFirstUser);
-		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) 50);
+		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) sum1);
+
+		// запрашиваем информацию профиля
+		InfoGetUserResponse infoGetUserResponse1 = GetUserInfo.getInfo(createUserRequest1);// отправитель
+		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == (double) sum1);
+
+		InfoGetUserResponse infoGetUserResponse2 = GetUserInfo.getInfo(createUserRequest2);// получатель
+		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() ==  (double) sum2);
 
 	}
 
@@ -259,10 +279,10 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		int idAccount2 = createAccountResponse2.getId();
 
 		// пополняем первый счет
-		UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, 500 );
+		int sum = (int)UserCreateDeposit.createDeposit(createUserRequest,createAccountResponse1, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 		// переводим деньги с одного счета на другой
-		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, 50);
+		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, sum);
 
 
 		// берем айди аккаунта по которому был перевод
@@ -288,7 +308,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				.orElse(null);
 
 		softly.assertThat(transfer_out).isNotNull();
-		softly.assertThat(transfer_out.getAmount()).isEqualTo(50.0);
+		softly.assertThat(transfer_out.getAmount()).isEqualTo((double) sum);
 		softly.assertThat(transfer_out.getRelatedAccountId()).isEqualTo(idAccount2);
 
 		Transaction deposit = transactions.stream()
@@ -297,7 +317,7 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				.orElse(null);
 
 		softly.assertThat(deposit).isNotNull();
-		softly.assertThat(deposit.getAmount()).isEqualTo(500.0);
+		softly.assertThat(deposit.getAmount()).isEqualTo((double) sum);
 		softly.assertThat(deposit.getRelatedAccountId()).isEqualTo(idAccount1);
 
 	}
@@ -321,8 +341,12 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 				ResponseSpecs.requestReturnForbidden(),
 				Endpoint.LOOK_TRANSFER).getWithParams(createAccountResponse2.getId()).extract().asString();
 
-		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN_PERMISSION );
 
+	}
+
+	private static int getMaxDeposit(){
+		return 5000;
 	}
 
 }

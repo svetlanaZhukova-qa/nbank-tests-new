@@ -16,21 +16,38 @@ public class ModelComparisonConfigLoader {
 			Properties props = new Properties();
 			props.load(input);
 			for (String key : props.stringPropertyNames()) {
-				String[] target = props.getProperty(key).split(":");
-				if (target.length != 2) continue;
+				// key теперь вида "ClassA->ClassB"
+				String[] keyParts = key.split("->");
+				if (keyParts.length != 2) {
+					throw new IllegalArgumentException(
+							"Invalid key format: '" + key + "'. Expected: 'ClassA->ClassB'"
+					);
+				}
+				String requestClassName = keyParts[0].trim();
+				String responseClassName = keyParts[1].trim();
 
-				String responseClassName = target[0].trim();
+				String value = props.getProperty(key);
+				String[] target = value.split(":");
+				if (target.length != 2) {
+					throw new IllegalArgumentException(
+							"Invalid value format: '" + value + "'. Expected: 'ResponseClass:field1=field1Resp,...'"
+					);
+				}
+
+				String responseClassSimpleName = target[0].trim();
 				List<String> fields = Arrays.asList(target[1].split(","));
 
-				rules.put(key.trim(), new ComparisonRule(responseClassName, fields));
+				// Составной ключ: "ClassA->ClassB"
+				rules.put(key.trim(), new ComparisonRule(responseClassSimpleName, fields));
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load DTO comparison config", e);
 		}
 	}
 
-	public ComparisonRule getRuleFor(Class<?> requestClass) {
-		return rules.get(requestClass.getSimpleName());
+	public ComparisonRule getRuleFor(Class<?> requestClass, Class<?> responseClass) {
+		String key = requestClass.getSimpleName() + "->" + responseClass.getSimpleName();
+		return rules.get(key);
 	}
 
 	public static class ComparisonRule {
@@ -46,7 +63,6 @@ public class ModelComparisonConfigLoader {
 				if (parts.length == 2) {
 					fieldMappings.put(parts[0].trim(), parts[1].trim());
 				} else {
-					// fallback: same field name if mapping not explicitly given
 					fieldMappings.put(pair.trim(), pair.trim());
 				}
 			}
@@ -60,5 +76,4 @@ public class ModelComparisonConfigLoader {
 			return fieldMappings;
 		}
 	}
-
 }

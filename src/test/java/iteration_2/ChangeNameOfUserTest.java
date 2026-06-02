@@ -2,6 +2,7 @@ package iteration_2;
 
 import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.generators.RandomData;
+import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.*;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
@@ -61,11 +62,13 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				Endpoint.USER_UPDATE).update(infoPutUserRequest);
 
 
-		softly.assertThat(infoPutUserResponse.getMessage()).isEqualTo("Profile updated successfully");
+		softly.assertThat(infoPutUserResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_SUCCESSFUL_UPDATE_PROFILE);
 		softly.assertThat(infoPutUserResponse.getCustomer().getName()).isEqualTo(name);
 		softly.assertThat(infoPutUserResponse.getCustomer().getUsername()).isEqualTo(createUserRequest.getUsername());
-		softly.assertThat(infoPutUserResponse.getCustomer().getRole().toString()).isEqualTo(createUserRequest.getRole().toString());
+		ModelAssertions.assertThatModels(infoPutUserResponse, createUserRequest).match();
 		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
+
+
 
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
@@ -86,7 +89,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnBadRequest(),Endpoint.USER_UPDATE)
 				.update(infoPutUserRequest).extract().asString();
-		softly.assertThat(errorMessage).isEqualTo("Name must contain two words with letters only");
+		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_NOT_VALID_NAME);
+
+		// запрашиваем информацию о профиле
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoUserResponse.getName()).isNotEqualTo(name);
 
 	}
 
@@ -97,12 +104,17 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	public void userCantChangeTheirPassword(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
+		String name = RandomData.getRandomName();
 
 		// отправляем запрос на изменение имени
-		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").password(RandomData.getRandomPassword()).build();
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).password(RandomData.getRandomPassword()).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
 		softly.assertThat(createUserRequest.getPassword()).isEqualTo(infoPutUserResponse.getCustomer().getPassword());
+
+		// запрашиваем информацию о профиле
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 	}
 
 
@@ -113,12 +125,17 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	public void userCantChangeTheirUserName(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
+		String name = RandomData.getRandomName();
 
 		// отправляем запрос на изменение имени
-		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").username(RandomData.getRandomUserName()).build();
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).username(RandomData.getRandomUserName()).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
 		softly.assertThat(createUserRequest.getUsername()).isEqualTo(infoPutUserResponse.getCustomer().getUsername());
+
+		// запрашиваем информацию о профиле
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}
 
@@ -129,13 +146,17 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	public void userCantChangeTheirRole(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
+		String name = RandomData.getRandomName();
+
 
 		// отправляем запрос на изменение имени
-		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name("Svetlana Svetlana").role(UserRole.ADMIN).build();
+		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).role(UserRole.ADMIN).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
 		softly.assertThat(createUserRequest.getRole().toString()).isEqualTo(infoPutUserResponse.getCustomer().getRole().toString());
+		// запрашиваем информацию о профиле
+		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 	}
-
 
 }
