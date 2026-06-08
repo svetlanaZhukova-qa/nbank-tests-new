@@ -1,4 +1,4 @@
-package iteration_2;
+package iteration_2.api;
 
 import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.generators.RandomData;
@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 // Имя в профиле (name):
 //— Два слова, состоящее из букв, разделенные пробелом
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
-public class ChangeNameOfUserTest extends BaseTest  {
+public class ChangeNameOfUserTest extends BaseTest {
 
 	@Test
 	@Tag("positive")

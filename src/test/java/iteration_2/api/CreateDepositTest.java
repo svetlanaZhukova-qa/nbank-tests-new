@@ -1,4 +1,4 @@
-package iteration_2;
+package iteration_2.api;
 
 import iteration_2.data.Account;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 //— Сумма должна быть положительной
 //— Нельзя делать депозит в чужой аккаунт или несуществующий
 @DisplayName("Тесты на проверку возможности создания Депозита")
-public class CreateDepositTest extends BaseTest{
+public class CreateDepositTest extends BaseTest {
 
 
 	@ParameterizedTest
