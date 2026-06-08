@@ -4,6 +4,7 @@ import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
 import iteration_2.data.Account;
+import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
@@ -72,12 +73,15 @@ public class CreateDepositTest {
 		Selenide.open("/deposit");
 		$("select.account-selector").click();
 		$$("select.account-selector option").findBy(text(accountNumber)).click();
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys("500");
+		int depositAmount = RandomData.getRandomDeposit();
+		String depositAmountStr = String.valueOf(depositAmount);
+
+		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(depositAmountStr);
 		$(byText("\uD83D\uDCB5 Deposit")).click();
 
 		Alert alert = switchTo().alert();
 
-		assertEquals(alert.getText(), "✅ Successfully deposited $500 to account " + accountNumber + "!");
+		assertEquals(alert.getText(), "✅ Successfully deposited $" + depositAmount + " to account " + accountNumber + "!");
 
 		alert.accept();
 
@@ -90,7 +94,7 @@ public class CreateDepositTest {
 				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
 		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
-		assertThat(account.get().getBalance()).isEqualTo(500);
+		assertThat(account.get().getBalance()).isEqualTo(depositAmount);
 		assertThat(account.get().getId()).isEqualTo(idAccount);
 
 	}
@@ -121,7 +125,9 @@ public class CreateDepositTest {
 		Selenide.open("/deposit");
 		$("select.account-selector").click();
 		$$("select.account-selector option").findBy(text(accountNumber)).click();
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys("5001");
+		int notValidDeposit = getMaxDeposit() + 1;
+		String depositToString = String.valueOf(notValidDeposit);
+		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(depositToString);
 		$(byText("\uD83D\uDCB5 Deposit")).click();
 
 		Alert alert = switchTo().alert();
@@ -142,6 +148,11 @@ public class CreateDepositTest {
 		assertThat(account.get().getBalance()).isEqualTo(0);
 		assertThat(account.get().getId()).isEqualTo(idAccount);
 
+	}
+
+
+	private static int getMaxDeposit(){
+		return 5000;
 	}
 
 

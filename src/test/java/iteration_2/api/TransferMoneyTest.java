@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 
 // Перевод денег с одного аккаунта на другой
@@ -324,5 +325,11 @@ softly.assertThat(infoGetUserResponse.getPassword()).isEqualTo(createUserRespons
 		softly.assertThat(errorMessage).isEqualTo("You do not have permission to access this account");
 
 	}
+
+
+	private static int getMaxDeposit(){
+		return 5000;
+	}
+
 
 }

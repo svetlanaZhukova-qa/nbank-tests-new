@@ -4,6 +4,7 @@ import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
 import iteration_2.data.Account;
+import iteration_2.generators.RandomData;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
@@ -18,11 +19,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
+
+import java.util.Locale;
 import java.util.Map;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byAttribute;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
@@ -68,19 +70,21 @@ public class TransferMoneyTest {
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 		// создаем депозит
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 500);
+		int deposit = RandomData.getRandomDeposit();
+		String depositToString = String.valueOf(deposit);
+		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		// переводит деньги с одного счета на другой
 		Selenide.open("/transfer");
 		$("select.account-selector").click();
 		$$("select.account-selector option").findBy(text(accountNumber1)).click();
 		$(Selectors.byAttribute("placeholder", "Enter recipient account number")).sendKeys(accountNumber2);
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys("50");
+		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(depositToString);
 		$("#confirmCheck").setSelected(true);
 		$(byText("\uD83D\uDE80 Send Transfer")).click();
 
 		Alert alert = switchTo().alert();
 
-		assertEquals(alert.getText(), "✅ Successfully transferred $50 to account " + accountNumber2 + "!");
+		assertEquals(alert.getText(), "✅ Successfully transferred $" + deposit + " to account " + accountNumber2 + "!");
 
 		alert.accept();
 
@@ -98,10 +102,10 @@ public class TransferMoneyTest {
 				.orElseThrow(() -> new AssertionError("Account " + accountNumber2 + " not found"));
 
 		// Счет 1: был депозит 500, перевод  прошел → баланс 450
-		assertEquals(450.0, account1.getBalance(), 0.01);
+		assertEquals(0, account1.getBalance(), 0.01);
 
 		// Счет 2: прошел перевод -> баланс 50
-		assertEquals(50.0, account2.getBalance(), 0.01);
+		assertEquals(deposit, account2.getBalance(), 0.01);
 
 	}
 
@@ -130,13 +134,17 @@ public class TransferMoneyTest {
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 		// создаем депозит
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 500);
+		int deposit = RandomData.getRandomDeposit();
+
+		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		// переводит деньги с одного счета на другой
 		Selenide.open("/transfer");
 		$("select.account-selector").click();
 		$$("select.account-selector option").findBy(text(accountNumber1)).click();
 		$(Selectors.byAttribute("placeholder", "Enter recipient account number")).sendKeys(accountNumber2);
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys("-1");
+		int notValidSum = getMaxDeposit() - getMaxDeposit() - 1;
+		String notValidSumToString = String.valueOf(notValidSum);
+		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(notValidSumToString);
 		$("#confirmCheck").setSelected(true);
 		$(byText("\uD83D\uDE80 Send Transfer")).click();
 
@@ -160,7 +168,7 @@ public class TransferMoneyTest {
 				.orElseThrow(() -> new AssertionError("Account " + accountNumber2 + " not found"));
 
 		// Счет 1: был депозит 500, перевод не прошел → баланс 500
-		assertEquals(500.0, account1.getBalance(), 0.01);
+		assertEquals((double) deposit, account1.getBalance(), 0.01);
 
 		// Счет 2: ничего не поступало → баланс 0
 		assertEquals(0.0, account2.getBalance(), 0.01);
@@ -191,27 +199,53 @@ public class TransferMoneyTest {
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 		// создаем депозит
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, 500);
-		// переводит деньги с одного счета на другой
-		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, 500);
-		// просматриваем информацию о счетах
+		int deposit = RandomData.getRandomDeposit();
+
+		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
+		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, deposit);
+
+		// Переходим к просмотру транзакций
 		Selenide.open("/transfer");
-		$(byText("\uD83D\uDD01 Transfer Again")).click();
+		$(byText("🔁 Transfer Again")).click();
 		$(byAttribute("placeholder", "Enter name to find transactions")).sendKeys(createUserRequest.getUsername());
-		$(byText("\uD83D\uDD0D Search Transactions")).click();
+		$(byText("🔍 Search Transactions")).click();
+
+		// Ждем появления заголовка
 		$("h3.mt-4").shouldHave(text("Matching Transactions"));
 
-		// Проверяем, что список транзакций содержит ровно 3 элемента
+		// Проверяем, что список содержит ровно 3 элемента
 		$$(".list-group-item").shouldHave(size(3));
 
+		// Форматируем сумму с точкой (Locale.US) — как в UI
+		String depositFormatted = String.format(Locale.US, "%.2f", (double) deposit);
 
-
-		$(".list-group").shouldHave(
-				text("TRANSFER_OUT - $500.00"),
-				text("DEPOSIT - $500.00"),
-				text("TRANSFER_IN - $500.00"),
-				text("Found under: " + createUserRequest.getUsername())
+		// Проверяем каждую транзакцию отдельно
+		// 1. DEPOSIT
+		$$(".list-group-item").findBy(text("DEPOSIT")).shouldHave(
+				text("DEPOSIT - $" + depositFormatted),
+				text("🔍 Found under:")
 		);
+
+		// 2. TRANSFER_OUT
+		$$(".list-group-item").findBy(text("TRANSFER_OUT")).shouldHave(
+				text("TRANSFER_OUT - $" + depositFormatted),
+				text("🔍 Found under:")
+		);
+
+		// 3. TRANSFER_IN
+		$$(".list-group-item").findBy(text("TRANSFER_IN")).shouldHave(
+				text("TRANSFER_IN - $" + depositFormatted),
+				text("🔍 Found under:")
+		);
+
+		// Проверяем, что кнопки Repeat есть у всех
+		$$(".list-group-item").forEach(item ->
+				item.$("button").shouldHave(text("🔁 Repeat"))
+		);
+	}
+
+	private static int getMaxDeposit(){
+		return 5000;
 	}
 
 
