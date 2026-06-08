@@ -37,7 +37,13 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
+
 
 		ModelAssertions.assertThatModels(infoUserResponse, createUserRequest).match();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
@@ -71,7 +77,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}
@@ -92,7 +102,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_NOT_VALID_NAME);
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoUserResponse.getName()).isNotEqualTo(name);
 
 	}
@@ -113,7 +127,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(createUserRequest.getPassword()).isEqualTo(infoPutUserResponse.getCustomer().getPassword());
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 	}
 
@@ -134,7 +152,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		softly.assertThat(createUserRequest.getUsername()).isEqualTo(infoPutUserResponse.getCustomer().getUsername());
 
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}
@@ -155,7 +177,11 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
 		softly.assertThat(createUserRequest.getRole().toString()).isEqualTo(infoPutUserResponse.getCustomer().getRole().toString());
 		// запрашиваем информацию о профиле
-		InfoGetUserResponse infoUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 	}
 

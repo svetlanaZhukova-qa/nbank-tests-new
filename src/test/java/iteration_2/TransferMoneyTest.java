@@ -4,6 +4,7 @@ package iteration_2;
 import iteration_1.models.comparison.ModelAssertions;
 import iteration_2.data.Account;
 import iteration_2.data.Transaction;
+import iteration_2.data.TransactionType;
 import iteration_2.generators.RandomData;
 import iteration_2.generators.RandomModelGenerator2Iteration;
 import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
@@ -36,91 +37,106 @@ import java.util.stream.Stream;
 
 @DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
 public class TransferMoneyTest extends BaseTest {
-
 	@ParameterizedTest
 	@ValueSource(ints = {9999, 10000})
 	@Tag("positive")
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой. Максимальная сумма 10000")
-	public void UserCanTransferMoneyFromOneAccountToAnother(int sum){
-		// создаем пользователя и извлекаем токен
+	public void UserCanTransferMoneyFromOneAccountToAnother(int sum) {
+		// Создаем пользователя
 		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
+		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(
+				RequestSpecs.adminSpec(),
+				ResponseSpecs.entityWasCreated(),
+				Endpoint.ADMIN_USER
+		).post(createUserRequest);
 
-		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated(),
-				Endpoint.ADMIN_USER).post(createUserRequest);
+		// Создаем 2 счета
+		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
+		long idAccount1 = createAccountResponse1.getId();
 
-		// создаем 2 счета
-		//1-ый счет
-		CreateAccountResponse createAccountResponse1 =  UserCreateAccount.userCreateAccount(createUserRequest);
-		int idAccount1 = createAccountResponse1.getId();
-
-		// 2-ой счет
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
-		int idAccount2 = createAccountResponse2.getId();
+		long idAccount2 = createAccountResponse2.getId();
 
-		// пополняем первый счет на 10 000
-		// 1-ый раз на 5 000
+		// Пополняем первый счет: 2 депозита по 5000
+		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, getMaxDeposit());
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, getMaxDeposit());
 
-		// 2-ой раз на 5 000
-	UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, getMaxDeposit());
+		// Переводим деньги
+		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(
+				createUserRequest, createAccountResponse1, createAccountResponse2, sum);
 
-		// переводим деньги с одного счета на другой
-		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, sum);
-
+		// Проверяем ответ перевода
 		softly.assertThat(createTransferResponse.getReceiverAccountId()).isEqualTo(idAccount2);
 		softly.assertThat(createTransferResponse.getSenderAccountId()).isEqualTo(idAccount1);
-		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double)sum);
+		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) sum);
 		softly.assertThat(createTransferResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_TRANSFER_SUCCESSFUL);
 
-		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-		ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest).match();
-		ModelAssertions.assertThatModels(infoGetUserResponse,createUserResponse).match();
+		// Получаем профиль
+		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 
-//List<Account> accounts = infoGetUserResponse.getAccounts();
-//		Optional<Account> account1 = accounts.stream().filter(a -> a.getId() == idAccount1).findFirst();
-//		softly.assertThat(account1.get().getAccountNumber()).isEqualTo(createAccountResponse1.getAccountNumber());
-//		softly.assertThat(account1.get().getBalance()).isEqualTo(10000 - sum);
-//		softly.assertThat(account1.get().getTransactions().size()).isEqualTo(3);
-//
-//		Optional<Account> account2 = accounts.stream().filter(a -> a.getId() == idAccount2).findFirst();
-//		softly.assertThat(account2.get().getAccountNumber()).isEqualTo(createAccountResponse2.getAccountNumber());
-//		softly.assertThat(account2.get().getBalance()).isEqualTo(sum);
-//		softly.assertThat(account2.get().getTransactions().size()).isEqualTo(1);
+		ModelAssertions.assertThatModels(infoGetUserResponse, createUserRequest).match();
+		ModelAssertions.assertThatModels(infoGetUserResponse, createUserResponse).match();
 
+		// Находим конкретные счета по известным ID
 		List<Account> accounts = infoGetUserResponse.getAccounts();
 
-		for (Account account : accounts) {
-			for (Transaction transaction : account.getTransactions()) {
-				if ("DEPOSIT".equals(transaction.getType())) {
-					softly.assertThat(transaction.getRelatedAccountId())
-							.as("relatedAccountId для DEPOSIT в аккаунте %s", account.getId())
-							.isEqualTo(account.getId());
-				} else if ("TRANSFER_OUT".equals(transaction.getType())) {
-					// relatedAccountId должен быть id другого аккаунта
-					long expectedRelatedId = accounts.stream()
-							.filter(a -> a.getId() != account.getId())
-							.findFirst()
-							.orElseThrow()
-							.getId();
-					softly.assertThat(transaction.getRelatedAccountId())
-							.as("relatedAccountId для TRANSFER_OUT в аккаунте %s", account.getId())
-							.isEqualTo(expectedRelatedId);
-				} else if ("TRANSFER_IN".equals(transaction.getType())) {
-					// аналогично, relatedAccountId — это id другого аккаунта
-					long expectedRelatedId = accounts.stream()
-							.filter(a -> a.getId() != account.getId())
-							.findFirst()
-							.orElseThrow()
-							.getId();
-					softly.assertThat(transaction.getRelatedAccountId())
-							.as("relatedAccountId для TRANSFER_IN в аккаунте %s", account.getId())
-							.isEqualTo(expectedRelatedId);
-				}
-			}
-		}
+		Account account1 = accounts.stream()
+				.filter(a -> a.getId() == idAccount1)
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("Счет отправителя (id=" + idAccount1 + ") не найден"));
 
+		Account account2 = accounts.stream()
+				.filter(a -> a.getId() == idAccount2)
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("Счет получателя (id=" + idAccount2 + ") не найден"));
+
+		// Проверяем балансы
+		softly.assertThat(account1.getBalance()).isEqualTo(10000.0 - sum);
+		softly.assertThat(account2.getBalance()).isEqualTo((double) sum);
+
+		// === Проверяем транзакции счета 1 (отправитель) ===
+		List<Transaction> transactions1 = account1.getTransactions();
+		softly.assertThat(transactions1).hasSize(3);
+
+		// Находим транзакции по типу (не зависим от порядка в JSON)
+		List<Transaction> deposits1 = transactions1.stream()
+				.filter(t -> t.getType().equals(TransactionType.DEPOSIT.name()))
+				.toList();
+		List<Transaction> transfersOut = transactions1.stream()
+				.filter(t -> t.getType().equals(TransactionType.TRANSFER_OUT.name()))
+				.toList();
+
+		softly.assertThat(deposits1).hasSize(2);
+		softly.assertThat(transfersOut).hasSize(1);
+
+		// Проверяем депозиты (любой порядок, суммы одинаковые)
+		softly.assertThat(deposits1).allMatch(t -> t.getAmount() == 5000.0);
+		softly.assertThat(deposits1).allMatch(t -> t.getRelatedAccountId() == idAccount1);
+
+		// Проверяем перевод OUT
+		Transaction transferOut = transfersOut.get(0);
+		softly.assertThat(transferOut.getAmount()).isEqualTo((double) sum);
+		softly.assertThat(transferOut.getRelatedAccountId()).isEqualTo(idAccount2);
+
+		// === Проверяем транзакции счета 2 (получатель) ===
+		List<Transaction> transactions2 = account2.getTransactions();
+		softly.assertThat(transactions2).hasSize(1);
+
+		List<Transaction> transfersIn = transactions2.stream()
+				.filter(t -> t.getType().equals(TransactionType.TRANSFER_IN.name()))
+				.toList();
+		softly.assertThat(transfersIn).hasSize(1);
+
+		Transaction transferIn = transfersIn.get(0);
+		softly.assertThat(transferIn.getAmount()).isEqualTo((double) sum);
+		softly.assertThat(transferIn.getRelatedAccountId()).isEqualTo(idAccount1);
 	}
+
+
 
 
 
@@ -167,7 +183,11 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(errorMessage).isEqualTo(error);
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoGetUserResponse.getAccounts().get(1).getBalance() == 0);
 		softly.assertThat(infoGetUserResponse.getAccounts().get(0).getBalance() == getMaxDeposit() * 2);
 
@@ -209,10 +229,19 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN );
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse1 = GetUserInfo.getInfo(createUserRequest1);// получатель
+		InfoGetUserResponse infoGetUserResponse1 = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == balance2);
 
-		InfoGetUserResponse infoGetUserResponse2 = GetUserInfo.getInfo(createUserRequest2);// отправитель
+		// отправитель
+		InfoGetUserResponse infoGetUserResponse2 = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() == balance1);
 
 
@@ -255,10 +284,20 @@ public class TransferMoneyTest extends BaseTest {
 		softly.assertThat(createTransferResponse.getAmount()).isEqualTo((double) sum1);
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse1 = GetUserInfo.getInfo(createUserRequest1);// отправитель
+		// отправитель
+		InfoGetUserResponse infoGetUserResponse1 = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == (double) sum1);
 
-		InfoGetUserResponse infoGetUserResponse2 = GetUserInfo.getInfo(createUserRequest2);// получатель
+		// получатель
+		InfoGetUserResponse infoGetUserResponse2 = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest1.getUsername(), createUserRequest1.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
 		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() ==  (double) sum2);
 
 	}
@@ -348,5 +387,7 @@ public class TransferMoneyTest extends BaseTest {
 	private static int getMaxDeposit(){
 		return 5000;
 	}
+
+	private record TransactionWithAccount(Transaction transaction, long accountId) {}
 
 }

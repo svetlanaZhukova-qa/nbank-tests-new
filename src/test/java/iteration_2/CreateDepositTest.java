@@ -9,6 +9,7 @@ import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse
 import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import iteration_2.requests.skelethon.Endpoint;
 import iteration_2.requests.skelethon.requesters.CrudRequester;
+import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import iteration_2.requests.steps.AdminSteps;
 import iteration_2.requests.steps.GetUserInfo;
 import iteration_2.requests.steps.UserCreateAccount;
@@ -54,8 +55,12 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(pair.getRequest().getBalance()).isEqualTo((int) pair.getResponse().getBalance());
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-		ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest ).match();
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
+		ModelAssertions.assertThatModels(infoUserResponse,createUserRequest ).match();
 
 		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 			ResponseSpecs.requestReturnOk(),
@@ -99,8 +104,12 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(errorMessage).isEqualTo(error);
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-		double balance = infoGetUserResponse.getAccounts().get(0).getBalance();
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
+		double balance = infoUserResponse.getAccounts().get(0).getBalance();
 		softly.assertThat(balance == 0);
 
 		//ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest ).match();
@@ -122,8 +131,12 @@ public class CreateDepositTest extends BaseTest{
 //
 		 softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-		softly.assertThat(infoGetUserResponse.getAccounts().isEmpty());
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
+		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
 
 	}
 
@@ -150,7 +163,12 @@ public class CreateDepositTest extends BaseTest{
 		softly.assertThat(messageError).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
 
 		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest2);
-		softly.assertThat(infoGetUserResponse.getAccounts().get(0).getBalance() == 0);
+
+		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest2.getUsername(), createUserRequest2.getPassword()),
+				ResponseSpecs.requestReturnOk(),
+				Endpoint.USER_INFO
+		).get();
+		softly.assertThat(infoUserResponse.getAccounts().get(0).getBalance() == 0);
 	}
 }
