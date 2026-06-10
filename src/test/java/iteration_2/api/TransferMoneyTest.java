@@ -1,21 +1,21 @@
 package iteration_2.api;
 
 
-import iteration_2.data.Account;
-import iteration_2.data.Transaction;
-import iteration_2.generators.RandomModelGenerator2Iteration;
-import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
-import iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
-import iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
-import iteration_2.requests.skelethon.Endpoint;
-import iteration_2.requests.skelethon.requesters.CrudRequester;
-import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
-import iteration_2.requests.steps.*;
-import iteration_2.specs.RequestSpecs;
-import iteration_2.specs.ResponseSpecs;
+import api.iteration_2.data.Account;
+import api.iteration_2.data.Transaction;
+import api.iteration_2.generators.RandomModelGenerator2Iteration;
+import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
+import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
+import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
+import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
+import api.iteration_2.models_body_JSON.transfer_money.CreateTransferRequest;
+import api.iteration_2.models_body_JSON.transfer_money.CreateTransferResponse;
+import api.iteration_2.requests.skelethon.Endpoint;
+import api.iteration_2.requests.skelethon.requesters.CrudRequester;
+import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
+import api.iteration_2.requests.steps.*;
+import api.iteration_2.specs.RequestSpecs;
+import api.iteration_2.specs.ResponseSpecs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 // Перевод денег с одного аккаунта на другой

@@ -1,18 +1,18 @@
 package iteration_1.api;
 
-import iteration_1.generators.RandomModelGenerator;
-import iteration_1.models.CreateUserRequest;
-import iteration_1.models.CreateUserResponse;
-import iteration_1.models.comparison.ModelAssertions;
-import iteration_1.requests.skelethon.Endpoint;
-import iteration_1.requests.skelethon.requestsers.CrudRequester;
-import iteration_1.requests.skelethon.requestsers.ValidateCRUDRequester;
+import api.iteration_1.generators.RandomModelGenerator;
+import api.iteration_1.models.CreateUserRequest;
+import api.iteration_1.models.CreateUserResponse;
+import api.iteration_1.models.comparison.ModelAssertions;
+import api.iteration_1.requests.skelethon.Endpoint;
+import api.iteration_1.requests.skelethon.requestsers.CrudRequester;
+import api.iteration_1.requests.skelethon.requestsers.ValidateCRUDRequester;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import iteration_1.specs.RequestSpecs;
-import iteration_1.specs.ResponseSpecs;
+import api.iteration_1.specs.RequestSpecs;
+import api.iteration_1.specs.ResponseSpecs;
 
 import java.util.stream.Stream;
 

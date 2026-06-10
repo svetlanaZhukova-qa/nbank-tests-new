@@ -1,19 +1,19 @@
 package iteration_2.api;
 
-import iteration_1.models.comparison.ModelAssertions;
-import iteration_2.generators.RandomData;
-import iteration_2.models_body_JSON.*;
-import iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
-import iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
-import iteration_2.models_body_JSON.change_name_user.InfoPutUserResponse;
-import iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import iteration_2.requests.skelethon.Endpoint;
-import iteration_2.requests.skelethon.requesters.CrudRequester;
-import iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
-import iteration_2.requests.steps.AdminSteps;
-import iteration_2.requests.steps.GetUserInfo;
-import iteration_2.specs.RequestSpecs;
-import iteration_2.specs.ResponseSpecs;
+import api.iteration_1.models.comparison.ModelAssertions;
+import api.iteration_2.generators.RandomData;
+import api.iteration_2.models_body_JSON.UserRole;
+import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
+import api.iteration_2.models_body_JSON.change_name_user.InfoPutUserRequest;
+import api.iteration_2.models_body_JSON.change_name_user.InfoPutUserResponse;
+import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
+import api.iteration_2.requests.skelethon.Endpoint;
+import api.iteration_2.requests.skelethon.requesters.CrudRequester;
+import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
+import api.iteration_2.requests.steps.AdminSteps;
+import api.iteration_2.requests.steps.GetUserInfo;
+import api.iteration_2.specs.RequestSpecs;
+import api.iteration_2.specs.ResponseSpecs;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
