@@ -42,7 +42,6 @@ public class TransferMoneyTest extends BaseTest {
 	@Tag("positive")
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой. Максимальная сумма 10000")
 	public void UserCanTransferMoneyFromOneAccountToAnother(int sum) {
-		// Создаем пользователя
 		CreateUserRequest createUserRequest = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		CreateUserResponse createUserResponse = new ValidateCrudRequester2<CreateUserResponse>(
 				RequestSpecs.adminSpec(),
@@ -134,6 +133,7 @@ public class TransferMoneyTest extends BaseTest {
 		Transaction transferIn = transfersIn.get(0);
 		softly.assertThat(transferIn.getAmount()).isEqualTo((double) sum);
 		softly.assertThat(transferIn.getRelatedAccountId()).isEqualTo(idAccount1);
+
 	}
 
 
@@ -153,8 +153,8 @@ public class TransferMoneyTest extends BaseTest {
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить отрицательные суммы и суммы больше 10000")
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(int sum, String error){
-		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
+
 		// создаем 2 счета
 		//1-ый счет
 		 CreateAccountResponse createAccountResponse1 =  UserCreateAccount.userCreateAccount(createUserRequest);
@@ -188,6 +188,7 @@ public class TransferMoneyTest extends BaseTest {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoGetUserResponse.getAccounts().get(1).getBalance() == 0);
 		softly.assertThat(infoGetUserResponse.getAccounts().get(0).getBalance() == getMaxDeposit() * 2);
 
@@ -200,6 +201,7 @@ public class TransferMoneyTest extends BaseTest {
 		//создаем 2 пользователя
 		// 1-ый юзер
 		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
+
 		// 2-ой юзер
 		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 
@@ -210,13 +212,13 @@ public class TransferMoneyTest extends BaseTest {
 		// 2-ой юзер
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest2);
 		int idAccountSecondUser = createAccountResponse2.getId();
+
 		// пополняем каждый счет
 		// 1-ый юзер
 		double balance1 = UserCreateDeposit.createDeposit(createUserRequest1,createAccountResponse1, RandomData.getRandomDeposit()).getResponse().getBalance();
 
 		// 2-ой юзер
 		double balance2 = UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, RandomData.getRandomDeposit()).getResponse().getBalance();
-
 
 		// переводим деньги под одним юзером с чужого счета на его
 		CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(idAccountSecondUser)
@@ -234,6 +236,7 @@ public class TransferMoneyTest extends BaseTest {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == balance2);
 
 		// отправитель
@@ -242,8 +245,8 @@ public class TransferMoneyTest extends BaseTest {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
-		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() == balance1);
 
+		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() == balance1);
 
 	}
 
@@ -257,6 +260,7 @@ public class TransferMoneyTest extends BaseTest {
 
 		// 2-ой юзер
 		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
+
 		// создаем по 1 счету к каждому пользователю
 		// 1-ый юзер
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest1);
@@ -271,7 +275,6 @@ public class TransferMoneyTest extends BaseTest {
 
 		// 2-ой юзер
 		int sum2 = (int)UserCreateDeposit.createDeposit(createUserRequest2,createAccountResponse2, RandomData.getRandomDeposit()).getResponse().getBalance();
-
 
 		// переводим деньги под одним юзером на другой счет
 		CreateTransferResponse createTransferResponse = UserCreateTransfer.createTransfer(createUserRequest1,
@@ -290,6 +293,7 @@ public class TransferMoneyTest extends BaseTest {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoGetUserResponse1.getAccounts().get(0).getBalance() == (double) sum1);
 
 		// получатель
@@ -298,6 +302,7 @@ public class TransferMoneyTest extends BaseTest {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoGetUserResponse2.getAccounts().get(0).getBalance() ==  (double) sum2);
 
 	}
@@ -306,8 +311,8 @@ public class TransferMoneyTest extends BaseTest {
 	@Tag("positive")
 	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
 	public void userCanSeeTrackingOfTheirAccounts(){
-		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
+
 		// создаем 2 счета
 		//1-ый счет
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -322,7 +327,6 @@ public class TransferMoneyTest extends BaseTest {
 
 		// переводим деньги с одного счета на другой
 		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, sum);
-
 
 		// берем айди аккаунта по которому был перевод
 		// делаем запрос на отслеживание транзакций по айди аккаунта

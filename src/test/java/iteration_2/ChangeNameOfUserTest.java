@@ -28,27 +28,24 @@ import org.junit.jupiter.params.provider.ValueSource;
 // Имя в профиле (name):
 //— Два слова, состоящее из букв, разделенные пробелом
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
-public class ChangeNameOfUserTest extends BaseTest  {
+public class ChangeNameOfUserTest extends BaseTest {
 
 	@Test
 	@Tag("positive")
 	@DisplayName("Пользователь может видеть информацию о своем профиле")
-	public void userCanSeeInfoAboutTheirProfile(){
-		// создаем пользователя
+	public void userCanSeeInfoAboutTheirProfile() {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		// запрашиваем информацию о профиле
 
+		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
 				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
 
-
 		ModelAssertions.assertThatModels(infoUserResponse, createUserRequest).match();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(null);
 		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
-
 
 	}
 
@@ -56,25 +53,21 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Tag("positive")
 	@ValueSource(strings = {"S s", "Svetlana s"})
 	@DisplayName("Пользователь может меня свое имя в профиле.")
-	public void userCanChangeTheirNameWithCorrectData(String name){
-		// создаем пользователя
+	public void userCanChangeTheirNameWithCorrectData(String name) {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
-	// меняем имя
+		// меняем имя
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(
 				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_UPDATE).update(infoPutUserRequest);
 
-
 		softly.assertThat(infoPutUserResponse.getMessage()).isEqualTo(ResponseSpecs.MESSAGE_SUCCESSFUL_UPDATE_PROFILE);
 		softly.assertThat(infoPutUserResponse.getCustomer().getName()).isEqualTo(name);
 		softly.assertThat(infoPutUserResponse.getCustomer().getUsername()).isEqualTo(createUserRequest.getUsername());
 		ModelAssertions.assertThatModels(infoPutUserResponse, createUserRequest).match();
 		softly.assertThat(infoPutUserResponse.getCustomer().getAccounts()).isEmpty();
-
-
 
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
@@ -90,14 +83,13 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Tag("negative")
 	@ValueSource(strings = {"S ", "S  !", "   2  2  ", "", "ы№№№ о;;;;"})
 	@DisplayName("Пользователь не может меня свое имя в профиле с некорректными данными")
-	public void userCantChangeTheirNameWithNotCorrectData(String name){
-		// создаем пользователя
+	public void userCantChangeTheirNameWithNotCorrectData(String name) {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// меняем имя
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).build();
 		String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnBadRequest(),Endpoint.USER_UPDATE)
+				ResponseSpecs.requestReturnBadRequest(), Endpoint.USER_UPDATE)
 				.update(infoPutUserRequest).extract().asString();
 		softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_NOT_VALID_NAME);
 
@@ -115,8 +107,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может менять  password вместе с name")
-	public void userCantChangeTheirPassword(){
-		// создаем пользователя
+	public void userCantChangeTheirPassword() {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		String name = RandomData.getRandomName();
 
@@ -133,6 +124,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				Endpoint.USER_INFO
 		).get();
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
+
 	}
 
 
@@ -140,8 +132,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может менять  username вместе с name")
-	public void userCantChangeTheirUserName(){
-		// создаем пользователя
+	public void userCantChangeTheirUserName() {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		String name = RandomData.getRandomName();
 
@@ -149,6 +140,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).username(RandomData.getRandomUserName()).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
+
 		softly.assertThat(createUserRequest.getUsername()).isEqualTo(infoPutUserResponse.getCustomer().getUsername());
 
 		// запрашиваем информацию о профиле
@@ -157,6 +149,7 @@ public class ChangeNameOfUserTest extends BaseTest  {
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
 
 	}
@@ -165,24 +158,26 @@ public class ChangeNameOfUserTest extends BaseTest  {
 	@Tag("negative")
 	@DisplayName("Пользователь не может менять  role вместе с name")
 	@Test
-	public void userCantChangeTheirRole(){
-		// создаем пользователя
+	public void userCantChangeTheirRole() {
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 		String name = RandomData.getRandomName();
-
 
 		// отправляем запрос на изменение имени
 		InfoPutUserRequest infoPutUserRequest = InfoPutUserRequest.builder().name(name).role(UserRole.ADMIN).build();
 		InfoPutUserResponse infoPutUserResponse = new ValidateCrudRequester2<InfoPutUserResponse>(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnForbidden(), Endpoint.USER_UPDATE).update(infoPutUserRequest);
+
 		softly.assertThat(createUserRequest.getRole().toString()).isEqualTo(infoPutUserResponse.getCustomer().getRole().toString());
+
 		// запрашиваем информацию о профиле
 		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
 				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoUserResponse.getName()).isEqualTo(name);
+
 	}
 
 }

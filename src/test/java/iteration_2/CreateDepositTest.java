@@ -41,7 +41,6 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь может создать депозит с суммой не более 5000 за раз и больше 0")
 	@ValueSource(ints = {4999,5000})
 	public void userCanCreateDepositWithValidSum(int deposit){
-		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// создаем счет
@@ -60,6 +59,7 @@ public class CreateDepositTest extends BaseTest{
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		ModelAssertions.assertThatModels(infoUserResponse,createUserRequest ).match();
 
 		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
@@ -67,11 +67,11 @@ public class CreateDepositTest extends BaseTest{
 			Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
 		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
+
 		softly.assertThat(account.get().getBalance()).isEqualTo(deposit);
 		softly.assertThat(account.get().getId()).isEqualTo(idAccount);
 
 	}
-
 
 	public static Stream<Arguments> notValidSum(){
 		return Stream.of(
@@ -86,7 +86,6 @@ public class CreateDepositTest extends BaseTest{
 	@DisplayName("Пользователь не может создать депозит с суммой более 5000 за раз и меньше 0")
 	@MethodSource("notValidSum")
 	public void userCantCreateDepositWithNotValidSum(int deposit, String error){
-		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
 		// создаем счет
@@ -110,32 +109,32 @@ public class CreateDepositTest extends BaseTest{
 				Endpoint.USER_INFO
 		).get();
 		double balance = infoUserResponse.getAccounts().get(0).getBalance();
+
 		softly.assertThat(balance == 0);
 
-		//ModelAssertions.assertThatModels(infoGetUserResponse,createUserRequest ).match();
 	}
 
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить деньги на не существующий счет")
 	public void userCantCreateDepositOnNonExistAccount(){
-		// создаем пользователя и извлекаем токен
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
 
 		// переводим депозит
 		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().balance(RandomData.getRandomDeposit()).id(RandomData.getRandomIdAccount()).build();
 		 String errorMessage = new CrudRequester(RequestSpecs.authUserSpecForAcceptTEXT(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				 ResponseSpecs.requestReturnForbidden(),
 				 Endpoint.DEPOSIT).post(createDepositRequest).extract().body().asString();
-//
+
 		 softly.assertThat(errorMessage).isEqualTo(ResponseSpecs.ERROR_MESSAGE_FORBIDDEN);
+
 		// запрашиваем информацию профиля
 		InfoGetUserResponse infoUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>(
 				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoUserResponse.getAccounts().isEmpty());
 
 	}
@@ -144,15 +143,12 @@ public class CreateDepositTest extends BaseTest{
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить деньги на чужой счет")
 	public void userCantCreateDepositOnAnotherAccount(){
-		// создаем первого пользователя и извлекаем токен
 		CreateUserRequest createUserRequest1 = AdminSteps.createUser();
 
-		// создаем второго пользователя и извлекаем токен
 		CreateUserRequest createUserRequest2 = AdminSteps.createUser();
 
 		// создаем счет у второго пользователя
        CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest2);
-
 		int idAccountUser2 = createAccountResponse2.getId();
 
 		// переводим депозит под токеном первого пользователя на второй
@@ -169,6 +165,8 @@ public class CreateDepositTest extends BaseTest{
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO
 		).get();
+
 		softly.assertThat(infoUserResponse.getAccounts().get(0).getBalance() == 0);
+
 	}
 }
