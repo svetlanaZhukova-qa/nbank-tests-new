@@ -23,7 +23,7 @@ public class CreateUserTest extends BaseUITest{
 		// создаем пользователя
 		CreateUserRequest newUser = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		new AdminPanel().open().createUser(newUser.getUsername(), newUser.getPassword())
-				.checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY.getMessage())	// ШАГ 3: проверка, что алерт "✅ User created successfully!"
+				.checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY.format())	// ШАГ 3: проверка, что алерт "✅ User created successfully!"
 				.getAllUsers().findBy(Condition.exactText(newUser.getUsername() + "\nUSER")).shouldBe(Condition.visible);// ШАГ 4: проверка, что юзер отображается на UI
 
 		// ШАГ 5: проверка, что юзер создан на API
@@ -45,7 +45,7 @@ public class CreateUserTest extends BaseUITest{
 		CreateUserRequest newUser = RandomModelGenerator2Iteration.generate(CreateUserRequest.class);
 		newUser.setUsername("a");
 		new AdminPanel().open().createUser(newUser.getUsername(), newUser.getPassword())
-				.checkAlertMessageAndAccept(BankAlert.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS.getMessage())// ШАГ 3: проверка, что алерт "✅ User created successfully!"
+				.checkAlertMessageAndAccept(BankAlert.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS.format())// ШАГ 3: проверка, что алерт "✅ User created successfully!"
 				.getAllUsers().findBy(Condition.exactText(newUser.getUsername() + "\nUSER")).shouldNotBe(Condition.exist);// ШАГ 4: проверка, что юзер не отображается на UI
 
 		// ШАГ 5: проверка, что юзер не создан на API

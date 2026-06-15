@@ -33,8 +33,10 @@ public class CreateAccountTest extends BaseUITest{
 		assertThat(createdAccounts).hasSize(1);
 
 		new UserDashboard().checkAlertMessageAndAccept
-				(BankAlert.NEW_ACCOUNT_CREATED.getMessage() + createdAccounts.getFirst().getAccountNumber());
+				(BankAlert.NEW_ACCOUNT_CREATED.format() + createdAccounts.getFirst().getAccountNumber());
 
 		assertThat(createdAccounts.getFirst().getBalance()).isZero();
 	}
+
+
 }

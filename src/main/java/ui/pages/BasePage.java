@@ -23,11 +23,20 @@ public T open(){
         return Selenide.page(pageClass);
 	}
 
-	public T checkAlertMessageAndAccept(String bankAlert){
+	// Для констант
+	public T checkAlertMessageAndAccept(BankAlert bankAlert) {
+		return checkAlertMessageAndAccept(bankAlert.format());
+	}
+
+	// Для шаблонов
+	public T checkAlertMessageAndAccept(BankAlert bankAlert, Object... args) {
+		return checkAlertMessageAndAccept(bankAlert.format(args));
+	}
+
+	// Базовый метод
+	public T checkAlertMessageAndAccept(String expectedMessage) {
 		Alert alert = switchTo().alert();
-
-		assertThat(alert.getText()).contains(bankAlert);
-
+		assertThat(alert.getText()).contains(expectedMessage);
 		alert.accept();
 		return (T) this;
 	}
