@@ -32,6 +32,7 @@ public class ChangeNameOfUserTest extends BaseUITest {
 		// проверяем что на API имя изменилось
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 		assertEquals(infoGetUserResponse.getName(), newName);
+
 	}
 
 	@Test
@@ -44,9 +45,12 @@ public class ChangeNameOfUserTest extends BaseUITest {
 
 		// меняем имя профиля
 		String newName = RandomData.getRandomPassword();
-	    new UserDashboard().open().updateName(createUserRequest, newName).checkAlertMessageAndAccept(BankAlert.FAILED_CHANGE_NAME);
+	    new UserDashboard().open().updateName(createUserRequest, newName)
+				.checkAlertMessageAndAccept(BankAlert.FAILED_CHANGE_NAME);
+
 		// проверяем что на API имя  не изменилось
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 		assertEquals(infoGetUserResponse.getName(), null);
+
 	}
 }

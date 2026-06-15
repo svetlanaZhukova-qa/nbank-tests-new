@@ -23,21 +23,22 @@ public class TransferMoneyTest extends BaseUITest {
 	public void userCanTransferMoneyFromOneAccountToAnother(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
 		authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
+
 		// создаем счет 2
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
+
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
 		String depositToString = String.valueOf(deposit);
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
-		// переводит деньги с одного счета на другой
 
+		// переводит деньги с одного счета на другой
 		new TransferPanel().open().createTransfer(accountNumber1, accountNumber2, depositToString)
 				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_TRANSFERRED, deposit, accountNumber2);
 
@@ -68,24 +69,23 @@ public class TransferMoneyTest extends BaseUITest {
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
-	authAsUser(createUserRequest);
+		authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
+
 		// создаем счет 2
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
+
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
-
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
-		// переводит деньги с одного счета на другой
 
+		// переводит деньги с одного счета на другой
 		int notValidSum = getMaxDeposit() - getMaxDeposit() - 1;
 		String notValidSumToString = String.valueOf(notValidSum);
-
 		new TransferPanel().open().createTransfer(accountNumber1, accountNumber2,notValidSumToString)
 				.checkAlertMessageAndAccept(BankAlert.FAILED_TRANSFER);
 
@@ -107,6 +107,7 @@ public class TransferMoneyTest extends BaseUITest {
 
 		// Счет 2: ничего не поступало → баланс 0
 		assertEquals(0.0, account2.getBalance(), 0.01);
+
 	}
 
 	@Test
@@ -115,23 +116,22 @@ public class TransferMoneyTest extends BaseUITest {
 	public void userCanSeeTrackingOfTheirAccounts(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
-	authAsUser(createUserRequest);
+		authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
+
 		// создаем счет 2
 		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
+
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
-
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, deposit);
 
 		// Переходим к просмотру транзакций и делаем проверки
-
 		new TransferPanel().open()
 				.getAllTransactions(createUserRequest)
 				.checkTransactionsHeaderVisible()

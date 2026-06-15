@@ -22,9 +22,6 @@ public class BaseUITest extends BaseTest {
 		Configuration.browserVersion = Config.getProperty("browserVersion");
 		Configuration.browserSize =  Config.getProperty("browserSize");
 
-//		Configuration.browserCapabilities.setCapability("selenoid:options",
-//				Map.of("enableVNC", true, "enableLog", true)
-//		);
 		Map<String, Object> selenoidOptions = new HashMap<>();
 		selenoidOptions.put("enableVNC", true);
 		selenoidOptions.put("enableLog", true);

@@ -33,22 +33,19 @@ public class CreateDepositTest extends BaseUITest {
 	public void userCanCreateDeposit(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-
 		authAsUser(createUserRequest);
 
 		// создаем аккаунт
 		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber = createAccountResponse.getAccountNumber();
 		long idAccount = createAccountResponse.getId();
+
 		// создаем депозит
 		int depositAmount = RandomData.getRandomDeposit();
-
-		new DepositPanel().open().createDeposit(accountNumber, depositAmount).checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_DEPOSITED, depositAmount, accountNumber);
+		new DepositPanel().open().createDeposit(accountNumber, depositAmount)
+				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_DEPOSITED, depositAmount, accountNumber);
 
 		// проверка, что депозит создан на API
-		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-
 		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
@@ -56,6 +53,7 @@ public class CreateDepositTest extends BaseUITest {
 		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
 		assertThat(account.get().getBalance()).isEqualTo(depositAmount);
 		assertThat(account.get().getId()).isEqualTo(idAccount);
+
 	}
 
 	@Test
@@ -70,16 +68,14 @@ public class CreateDepositTest extends BaseUITest {
 		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
 		String accountNumber = createAccountResponse.getAccountNumber();
 		long idAccount = createAccountResponse.getId();
+
 		// создаем депозит
 		int notValidDeposit = getMaxDeposit() + 1;
-
-		new DepositPanel().open().createDeposit(accountNumber, notValidDeposit).checkAlertMessageAndAccept(BankAlert.FAILED_DEPOSIT);
+		new DepositPanel().open().createDeposit(accountNumber, notValidDeposit)
+				.checkAlertMessageAndAccept(BankAlert.FAILED_DEPOSIT);
 
 		// проверка, что депозит не создан на API
-		// запрашиваем информацию профиля
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
-
-		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+	    List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
