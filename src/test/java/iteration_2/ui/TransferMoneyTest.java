@@ -20,6 +20,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
+import ui.pages.BankAlert;
+import ui.pages.TransferPanel;
 
 import java.util.Locale;
 import java.util.Map;
@@ -40,16 +42,7 @@ public class TransferMoneyTest extends BaseUITest {
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
-		String userAuthHeader = new CrudRequester(
-				RequestSpecs.unAuthUserSpec(),
-				ResponseSpecs.requestReturnOk(), Endpoint.LOGIN_USER)
-				.post(UserLoginAndGetTokenRequest.builder().username(createUserRequest.getUsername()).password(createUserRequest.getPassword()).build())
-				.extract()
-				.header("Authorization");
-
-		Selenide.open("/");
-
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+		authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -62,19 +55,9 @@ public class TransferMoneyTest extends BaseUITest {
 		String depositToString = String.valueOf(deposit);
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		// переводит деньги с одного счета на другой
-		Selenide.open("/transfer");
-		$("select.account-selector").click();
-		$$("select.account-selector option").findBy(text(accountNumber1)).click();
-		$(Selectors.byAttribute("placeholder", "Enter recipient account number")).sendKeys(accountNumber2);
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(depositToString);
-		$("#confirmCheck").setSelected(true);
-		$(byText("\uD83D\uDE80 Send Transfer")).click();
 
-		Alert alert = switchTo().alert();
-
-		assertEquals(alert.getText(), "✅ Successfully transferred $" + deposit + " to account " + accountNumber2 + "!");
-
-		alert.accept();
+		new TransferPanel().open().createTransfer(accountNumber1, accountNumber2, depositToString)
+				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_TRANSFERRED, deposit, accountNumber2);
 
 //		// проверяем по API что счет действительно пополнен
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
@@ -104,16 +87,7 @@ public class TransferMoneyTest extends BaseUITest {
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
-		String userAuthHeader = new CrudRequester(
-				RequestSpecs.unAuthUserSpec(),
-				ResponseSpecs.requestReturnOk(), Endpoint.LOGIN_USER)
-				.post(UserLoginAndGetTokenRequest.builder().username(createUserRequest.getUsername()).password(createUserRequest.getPassword()).build())
-				.extract()
-				.header("Authorization");
-
-		Selenide.open("/");
-
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+	authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -126,21 +100,12 @@ public class TransferMoneyTest extends BaseUITest {
 
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		// переводит деньги с одного счета на другой
-		Selenide.open("/transfer");
-		$("select.account-selector").click();
-		$$("select.account-selector option").findBy(text(accountNumber1)).click();
-		$(Selectors.byAttribute("placeholder", "Enter recipient account number")).sendKeys(accountNumber2);
+
 		int notValidSum = getMaxDeposit() - getMaxDeposit() - 1;
 		String notValidSumToString = String.valueOf(notValidSum);
-		$(Selectors.byAttribute("placeholder", "Enter amount")).sendKeys(notValidSumToString);
-		$("#confirmCheck").setSelected(true);
-		$(byText("\uD83D\uDE80 Send Transfer")).click();
 
-		Alert alert = switchTo().alert();
-
-		assertEquals(alert.getText(), "❌ Error: Transfer amount must be at least 0.01");
-
-		alert.accept();
+		new TransferPanel().open().createTransfer(accountNumber1, accountNumber2,notValidSumToString)
+				.checkAlertMessageAndAccept(BankAlert.FAILED_TRANSFER);
 
 		// проверяем по API что счет действительно не пополнен
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
@@ -169,16 +134,7 @@ public class TransferMoneyTest extends BaseUITest {
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
 
-		String userAuthHeader = new CrudRequester(
-				RequestSpecs.unAuthUserSpec(),
-				ResponseSpecs.requestReturnOk(), Endpoint.LOGIN_USER)
-				.post(UserLoginAndGetTokenRequest.builder().username(createUserRequest.getUsername()).password(createUserRequest.getPassword()).build())
-				.extract()
-				.header("Authorization");
-
-		Selenide.open("/");
-
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+	authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -192,44 +148,17 @@ public class TransferMoneyTest extends BaseUITest {
 		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
 		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, deposit);
 
-		// Переходим к просмотру транзакций
-		Selenide.open("/transfer");
-		$(byText("🔁 Transfer Again")).click();
-		$(byAttribute("placeholder", "Enter name to find transactions")).sendKeys(createUserRequest.getUsername());
-		$(byText("🔍 Search Transactions")).click();
+		// Переходим к просмотру транзакций и делаем проверки
 
-		// Ждем появления заголовка
-		$("h3.mt-4").shouldHave(text("Matching Transactions"));
+		new TransferPanel().open()
+				.getAllTransactions(createUserRequest)
+				.checkTransactionsHeaderVisible()
+				.checkTransactionsCount(3)
+				.checkTransactionExists("DEPOSIT", deposit)
+				.checkTransactionExists("TRANSFER_OUT", deposit)
+				.checkTransactionExists("TRANSFER_IN", deposit)
+				.checkAllTransactionsHaveRepeatButton();
 
-		// Проверяем, что список содержит ровно 3 элемента
-		$$(".list-group-item").shouldHave(size(3));
-
-		// Форматируем сумму с точкой (Locale.US) — как в UI
-		String depositFormatted = String.format(Locale.US, "%.2f", (double) deposit);
-
-		// Проверяем каждую транзакцию отдельно
-		// 1. DEPOSIT
-		$$(".list-group-item").findBy(text("DEPOSIT")).shouldHave(
-				text("DEPOSIT - $" + depositFormatted),
-				text("🔍 Found under:")
-		);
-
-		// 2. TRANSFER_OUT
-		$$(".list-group-item").findBy(text("TRANSFER_OUT")).shouldHave(
-				text("TRANSFER_OUT - $" + depositFormatted),
-				text("🔍 Found under:")
-		);
-
-		// 3. TRANSFER_IN
-		$$(".list-group-item").findBy(text("TRANSFER_IN")).shouldHave(
-				text("TRANSFER_IN - $" + depositFormatted),
-				text("🔍 Found under:")
-		);
-
-		// Проверяем, что кнопки Repeat есть у всех
-		$$(".list-group-item").forEach(item ->
-				item.$("button").shouldHave(text("🔁 Repeat"))
-		);
 	}
 
 	private static int getMaxDeposit(){

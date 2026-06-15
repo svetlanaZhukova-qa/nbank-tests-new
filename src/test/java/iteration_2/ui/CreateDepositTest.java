@@ -1,13 +1,10 @@
 package iteration_2.ui;
 
-import com.codeborne.selenide.Selectors;
-import com.codeborne.selenide.Selenide;
 import api.iteration_2.data.Account;
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import api.iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
 import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.CrudRequester;
 import api.iteration_2.requests.steps.AdminSteps;
@@ -19,18 +16,13 @@ import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
 import ui.pages.BankAlert;
 import ui.pages.DepositPanel;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на проверку возможности создания Депозита")
 public class CreateDepositTest extends BaseUITest {

@@ -12,8 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class BasePage<T extends BasePage> {
 	protected SelenideElement usernameInput = $(Selectors.byAttribute("placeholder", "Username"));
 	protected SelenideElement passwordInput = $(Selectors.byAttribute("placeholder", "Password"));
+	protected SelenideElement enterAmount = $(Selectors.byAttribute("placeholder", "Enter amount"));
 
-public abstract String url();
+
+	public abstract String url();
 
 public T open(){
 		return Selenide.open(url(), (Class<T>) this.getClass() );
@@ -40,4 +42,7 @@ public T open(){
 		alert.accept();
 		return (T) this;
 	}
+
+
+
 }

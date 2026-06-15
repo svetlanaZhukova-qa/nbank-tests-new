@@ -8,8 +8,9 @@ public enum BankAlert {
 	USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS("Username must be between 3 and 15 characters", false),
 	NEW_ACCOUNT_CREATED("✅ New Account Created! Account Number: ", false),
 	SUCCESSFULLY_DEPOSITED("✅ Successfully deposited $%s to account %s!", true),
-	//assertEquals(alert.getText(), "❌ Please deposit less or equal to 5000$."
-	FAILED_DEPOSIT("❌ Please deposit less or equal to 5000$.", false);
+	FAILED_DEPOSIT("❌ Please deposit less or equal to 5000$.", false),
+	SUCCESSFULLY_TRANSFERRED("Successfully transferred $%s to account %s!", true),
+	FAILED_TRANSFER("❌ Error: Transfer amount must be at least 0.01", false);
 
 
 	private final String template;
