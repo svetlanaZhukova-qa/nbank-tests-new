@@ -1,29 +1,17 @@
 package iteration_2.ui;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Selectors;
-import com.codeborne.selenide.Selenide;
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import api.iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
-import api.iteration_2.requests.skelethon.Endpoint;
-import api.iteration_2.requests.skelethon.requesters.CrudRequester;
 import api.iteration_2.requests.steps.AdminSteps;
 import api.iteration_2.requests.steps.GetUserInfo;
-import api.iteration_2.specs.RequestSpecs;
-import api.iteration_2.specs.ResponseSpecs;
 import iteration_1.ui.BaseUITest;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
+import ui.pages.BankAlert;
+import ui.pages.UserDashboard;
 
-import java.util.Map;
-
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
@@ -34,27 +22,13 @@ public class ChangeNameOfUserTest extends BaseUITest {
 	public void userCanChangeTheirNameWithCorrectData(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		String userAuthHeader = new CrudRequester(
-				RequestSpecs.unAuthUserSpec(),
-				ResponseSpecs.requestReturnOk(), Endpoint.LOGIN_USER)
-				.post(UserLoginAndGetTokenRequest.builder().username(createUserRequest.getUsername()).password(createUserRequest.getPassword()).build())
-				.extract()
-				.header("Authorization");
+		authAsUser(createUserRequest);
 
-		Selenide.open("/");
-
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
-
-		Selenide.open("/dashboard");
-		$(byText(createUserRequest.getUsername())).click();
+		// меняем имя профиля
 		String newName = RandomData.getRandomName();
-		$(Selectors.byAttribute("placeholder", "Enter new name")).sendKeys(newName);
-		$(byText("💾 Save Changes")).click();
+		new UserDashboard().open().updateName(createUserRequest, newName)
+				.checkAlertMessageAndAccept(BankAlert.NAME_UPDATE_SUCCESSFULLY);
 
-		Alert alert = switchTo().alert();
-		assertEquals(alert.getText(), "✅ Name updated successfully!");
-
-		alert.accept();
 		// проверяем что на API имя изменилось
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 		assertEquals(infoGetUserResponse.getName(), newName);
@@ -66,27 +40,11 @@ public class ChangeNameOfUserTest extends BaseUITest {
 	public void userCantChangeTheirNameWithNotCorrectData(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		String userAuthHeader = new CrudRequester(
-				RequestSpecs.unAuthUserSpec(),
-				ResponseSpecs.requestReturnOk(), Endpoint.LOGIN_USER)
-				.post(UserLoginAndGetTokenRequest.builder().username(createUserRequest.getUsername()).password(createUserRequest.getPassword()).build())
-				.extract()
-				.header("Authorization");
+		authAsUser(createUserRequest);
 
-		Selenide.open("/");
-
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
-
-		Selenide.open("/dashboard");
-		$(byText(createUserRequest.getUsername())).click();
-		String newName = RandomData.getRandomUserName();
-		$(Selectors.byAttribute("placeholder", "Enter new name")).sendKeys(newName);
-		$(byText("💾 Save Changes")).click();
-
-		Alert alert = switchTo().alert();
-		assertEquals(alert.getText(), "Name must contain two words with letters only");
-
-		alert.accept();
+		// меняем имя профиля
+		String newName = RandomData.getRandomPassword();
+	    new UserDashboard().open().updateName(createUserRequest, newName).checkAlertMessageAndAccept(BankAlert.FAILED_CHANGE_NAME);
 		// проверяем что на API имя  не изменилось
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 		assertEquals(infoGetUserResponse.getName(), null);

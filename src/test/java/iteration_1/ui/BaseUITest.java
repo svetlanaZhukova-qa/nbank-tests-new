@@ -8,6 +8,7 @@ import com.codeborne.selenide.Selenide;
 import iteration_2.api.BaseTest;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.codeborne.selenide.Selenide.executeJavaScript;
@@ -21,9 +22,13 @@ public class BaseUITest extends BaseTest {
 		Configuration.browserVersion = Config.getProperty("browserVersion");
 		Configuration.browserSize =  Config.getProperty("browserSize");
 
-		Configuration.browserCapabilities.setCapability("selenoid:options",
-				Map.of("enableVNC", true, "enableLog", true)
-		);
+//		Configuration.browserCapabilities.setCapability("selenoid:options",
+//				Map.of("enableVNC", true, "enableLog", true)
+//		);
+		Map<String, Object> selenoidOptions = new HashMap<>();
+		selenoidOptions.put("enableVNC", true);
+		selenoidOptions.put("enableLog", true);
+		Configuration.browserCapabilities.setCapability("selenoid:options", selenoidOptions);
 
 	}
 	public void authAsUser(String username, String password){

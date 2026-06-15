@@ -10,7 +10,9 @@ public enum BankAlert {
 	SUCCESSFULLY_DEPOSITED("✅ Successfully deposited $%s to account %s!", true),
 	FAILED_DEPOSIT("❌ Please deposit less or equal to 5000$.", false),
 	SUCCESSFULLY_TRANSFERRED("Successfully transferred $%s to account %s!", true),
-	FAILED_TRANSFER("❌ Error: Transfer amount must be at least 0.01", false);
+	FAILED_TRANSFER("❌ Error: Transfer amount must be at least 0.01", false),
+	NAME_UPDATE_SUCCESSFULLY("✅ Name updated successfully!", false),
+	FAILED_CHANGE_NAME("Name must contain two words with letters only", false);
 
 
 	private final String template;
@@ -27,6 +29,5 @@ public enum BankAlert {
 		}
 		return String.format(template, args);
 	}
-
 
 }

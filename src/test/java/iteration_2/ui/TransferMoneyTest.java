@@ -1,36 +1,18 @@
 package iteration_2.ui;
 
-import api.iteration_2.requests.steps.*;
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Selectors;
-import com.codeborne.selenide.Selenide;
 import api.iteration_2.data.Account;
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import api.iteration_2.models_body_JSON.create_user_and_accont.UserLoginAndGetTokenRequest;
-import api.iteration_2.requests.skelethon.Endpoint;
-import api.iteration_2.requests.skelethon.requesters.CrudRequester;
-import api.iteration_2.specs.RequestSpecs;
-import api.iteration_2.specs.ResponseSpecs;
+import api.iteration_2.requests.steps.*;
 import iteration_1.ui.BaseUITest;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
 import ui.pages.BankAlert;
 import ui.pages.TransferPanel;
 
-import java.util.Locale;
-import java.util.Map;
-
-import static com.codeborne.selenide.CollectionCondition.size;
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selectors.byAttribute;
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
