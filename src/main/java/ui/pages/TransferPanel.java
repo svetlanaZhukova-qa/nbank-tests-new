@@ -4,6 +4,7 @@ import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest
 import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import ui.elements.AccountSelector;
 
 import java.util.Locale;
 
