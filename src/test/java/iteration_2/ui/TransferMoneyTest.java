@@ -4,8 +4,12 @@ import api.iteration_2.data.Account;
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
-import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import api.iteration_2.requests.steps.*;
+import api.iteration_2.requests.steps.GetUserInfo;
+import api.iteration_2.requests.steps.UserCreateAccount;
+import api.iteration_2.requests.steps.UserCreateDeposit;
+import api.iteration_2.requests.steps.UserCreateTransfer;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -20,30 +24,29 @@ public class TransferMoneyTest extends BaseUITest {
 	@Test
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой")
 	@Tag("positive")
+	@UserSession
 	public void userCanTransferMoneyFromOneAccountToAnother(){
-		// создаем пользователя и логинимся
-		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		//authAsUser(createUserRequest);
+		// Пользователь уже создан и авторизован через @UserSession
 
 		// создаем счет 1
-		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
 
 		// создаем счет 2
-		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
 		String depositToString = String.valueOf(deposit);
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
+		UserCreateDeposit.createDeposit(SessionStorage.getUser(1), createAccountResponse1, deposit);
 
 		// переводит деньги с одного счета на другой
 		new TransferPanel().open().createTransfer(accountNumber1, accountNumber2, depositToString)
 				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_TRANSFERRED, deposit, accountNumber2);
 
 //		// проверяем по API что счет действительно пополнен
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(SessionStorage.getUser(1));
 
 		Account account1 = infoGetUserResponse.getAccounts().stream()
 				.filter(acc -> accountNumber1.equals(acc.getAccountNumber()))
@@ -66,22 +69,21 @@ public class TransferMoneyTest extends BaseUITest {
 	@Test
 	@Tag("negative")
 	@DisplayName("Пользователь не может переводить отрицательные суммы")
+	@UserSession
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(){
-		// создаем пользователя и логинимся
-		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		//authAsUser(createUserRequest);
+		// Пользователь уже создан и авторизован через @UserSession
 
 		// создаем счет 1
-		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
 
 		// создаем счет 2
-		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
+		UserCreateDeposit.createDeposit(SessionStorage.getUser(1), createAccountResponse1, deposit);
 
 		// переводит деньги с одного счета на другой
 		int notValidSum = getMaxDeposit() - getMaxDeposit() - 1;
@@ -90,7 +92,7 @@ public class TransferMoneyTest extends BaseUITest {
 				.checkAlertMessageAndAccept(BankAlert.FAILED_TRANSFER);
 
 		// проверяем по API что счет действительно не пополнен
-		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
+		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(SessionStorage.getUser(1));
 
 		Account account1 = infoGetUserResponse.getAccounts().stream()
 				.filter(acc -> accountNumber1.equals(acc.getAccountNumber()))
@@ -113,27 +115,26 @@ public class TransferMoneyTest extends BaseUITest {
 	@Test
 	@Tag("positive")
 	@DisplayName("Пользователь может отслеживать состояние своих учетных записей")
+	@UserSession
 	public void userCanSeeTrackingOfTheirAccounts(){
-		// создаем пользователя и логинимся
-		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		//authAsUser(createUserRequest);
+		// Пользователь уже создан и авторизован через @UserSession
 
 		// создаем счет 1
-		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber1 = createAccountResponse1.getAccountNumber();
 
 		// создаем счет 2
-		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse2 = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber2 = createAccountResponse2.getAccountNumber();
 
 		// создаем депозит
 		int deposit = RandomData.getRandomDeposit();
-		UserCreateDeposit.createDeposit(createUserRequest, createAccountResponse1, deposit);
-		UserCreateTransfer.createTransfer(createUserRequest, createAccountResponse1, createAccountResponse2, deposit);
+		UserCreateDeposit.createDeposit(SessionStorage.getUser(1), createAccountResponse1, deposit);
+		UserCreateTransfer.createTransfer(SessionStorage.getUser(1), createAccountResponse1, createAccountResponse2, deposit);
 
 		// Переходим к просмотру транзакций и делаем проверки
 		new TransferPanel().open()
-				.getAllTransactions(createUserRequest)
+				.getAllTransactions(SessionStorage.getUser(1))
 				.checkTransactionsHeaderVisible()
 				.checkTransactionsCount(3)
 				.checkTransactionExists("DEPOSIT", deposit)

@@ -2,16 +2,14 @@ package iteration_2.ui;
 
 import api.iteration_2.data.Account;
 import api.iteration_2.generators.RandomData;
-import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
-import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.CrudRequester;
-import api.iteration_2.requests.steps.AdminSteps;
-import api.iteration_2.requests.steps.GetUserInfo;
 import api.iteration_2.requests.steps.UserCreateAccount;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -30,13 +28,12 @@ public class CreateDepositTest extends BaseUITest {
 	@Test
 	@DisplayName("Пользователь может делать депозит")
 	@Tag("positive")
+	@UserSession
 	public void userCanCreateDeposit(){
-		// создаем пользователя
-		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		//authAsUser(createUserRequest);
+		// Пользователь уже создан и авторизован через @UserSession
 
 		// создаем аккаунт
-		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber = createAccountResponse.getAccountNumber();
 		long idAccount = createAccountResponse.getId();
 
@@ -46,7 +43,7 @@ public class CreateDepositTest extends BaseUITest {
 				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_DEPOSITED, depositAmount, accountNumber);
 
 		// проверка, что депозит создан на API
-		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(SessionStorage.getUser(1).getUsername(), SessionStorage.getUser(1).getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
@@ -59,13 +56,12 @@ public class CreateDepositTest extends BaseUITest {
 	@Test
 	@DisplayName("Пользователь не может делать депозит с невалидной суммой")
 	@Tag("negative")
+	@UserSession
 	public void userCannotCreateDepositWithNotValidSum(){
-		// создаем пользователя
-		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		//authAsUser(createUserRequest);
+		// Пользователь уже создан и авторизован через @UserSession
 
 		// создаем аккаунт
-		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
+		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(SessionStorage.getUser(1));
 		String accountNumber = createAccountResponse.getAccountNumber();
 		long idAccount = createAccountResponse.getId();
 
@@ -75,7 +71,7 @@ public class CreateDepositTest extends BaseUITest {
 				.checkAlertMessageAndAccept(BankAlert.FAILED_DEPOSIT);
 
 		// проверка, что депозит не создан на API
-	    List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+	    List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(SessionStorage.getUser(1).getUsername(), SessionStorage.getUser(1).getPassword()),
 				ResponseSpecs.requestReturnOk(),
 				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
 
