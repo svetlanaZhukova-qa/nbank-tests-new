@@ -22,7 +22,7 @@ public class ChangeNameOfUserTest extends BaseUITest {
 	public void userCanChangeTheirNameWithCorrectData(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// меняем имя профиля
 		String newName = RandomData.getRandomName();
@@ -41,7 +41,7 @@ public class ChangeNameOfUserTest extends BaseUITest {
 	public void userCantChangeTheirNameWithNotCorrectData(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// меняем имя профиля
 		String newName = RandomData.getRandomPassword();

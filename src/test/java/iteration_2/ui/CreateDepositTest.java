@@ -33,7 +33,7 @@ public class CreateDepositTest extends BaseUITest {
 	public void userCanCreateDeposit(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// создаем аккаунт
 		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -62,7 +62,7 @@ public class CreateDepositTest extends BaseUITest {
 	public void userCannotCreateDepositWithNotValidSum(){
 		// создаем пользователя
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// создаем аккаунт
 		CreateAccountResponse createAccountResponse = UserCreateAccount.userCreateAccount(createUserRequest);

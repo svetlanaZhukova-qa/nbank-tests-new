@@ -4,6 +4,7 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import api.iteration_2.requests.steps.AdminSteps;
+import common.annotations.Browsers;
 import org.junit.jupiter.api.Test;
 import ui.pages.AdminPanel;
 import ui.pages.LoginPage;
@@ -14,6 +15,7 @@ import ui.pages.UserDashboard;
 public class LoginUserTest extends BaseUITest {
 
 	@Test
+	@Browsers({"firefox"})
 	public void adminCanLoginWithCorrectData(){
 		CreateUserRequest admin = CreateUserRequest.getAdmin();
 

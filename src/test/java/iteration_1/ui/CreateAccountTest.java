@@ -4,6 +4,8 @@ import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResp
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import api.iteration_2.requests.steps.AdminSteps;
 import api.iteration_2.requests.steps.UserSteps;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import org.junit.jupiter.api.Test;
 import ui.pages.BankAlert;
 import ui.pages.UserDashboard;
@@ -14,20 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateAccountTest extends BaseUITest{
 	@Test
+	@UserSession
 	public void userCanCreateAccountTest() {
-		// ШАГИ ПО НАСТРОЙКЕ ОКРУЖЕНИЯ
-		// ШАГ 1: админ логинится в банке
-		// ШАГ 2: админ создает юзера
-		// ШАГ 3: юзер логинится в банке
-
-		CreateUserRequest user = AdminSteps.createUser();
-
-		authAsUser(user);
-
 		new UserDashboard().open().createNewAccount();
 
-
-		List<CreateAccountResponse> createdAccounts = new UserSteps(user.getUsername(), user.getPassword())
+		List<CreateAccountResponse> createdAccounts = SessionStorage.getSteps()
 				.getAllAccounts();
 
 		assertThat(createdAccounts).hasSize(1);

@@ -36,7 +36,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Для @ParameterizedTest -->
@@ -44,7 +43,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Движок для запуска тестов (обязательно для Maven) -->
@@ -52,7 +50,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- REST Assured (для API тестов) -->
@@ -73,7 +70,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
             <version>1.10.3</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Для запуска тестов через Maven и IDE -->
@@ -81,7 +77,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
             <version>1.10.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Не обязательна для работы, но часто используется -->

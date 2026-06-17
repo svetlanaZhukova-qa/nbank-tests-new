@@ -5,14 +5,21 @@ import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest
 import api.iteration_2.specs.RequestSpecs;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import common.extensions.AdminSessionExtension;
+import common.extensions.BrowserMatchExtension;
+import common.extensions.UserSessionExtension;
 import iteration_2.api.BaseTest;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.codeborne.selenide.Selenide.executeJavaScript;
 
+@ExtendWith(AdminSessionExtension.class)// расширяет класс с помощью созданного нами класса экстеншена
+@ExtendWith(UserSessionExtension.class)// расширяет класс с помощью созданного нами класса экстеншена
+@ExtendWith(BrowserMatchExtension.class)
 public class BaseUITest extends BaseTest {
 	@BeforeAll
 	public static void setUpSelenoid(){
@@ -27,14 +34,5 @@ public class BaseUITest extends BaseTest {
 		selenoidOptions.put("enableLog", true);
 		Configuration.browserCapabilities.setCapability("selenoid:options", selenoidOptions);
 
-	}
-	public void authAsUser(String username, String password){
-		Selenide.open("/");
-		String userAuthHeader = RequestSpecs.getUserAuthHeader(username, password);
-		executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
-	}
-
-	public void authAsUser(CreateUserRequest createUserRequest){
-		authAsUser(createUserRequest.getUsername(),createUserRequest.getPassword());
 	}
 }

@@ -23,7 +23,7 @@ public class TransferMoneyTest extends BaseUITest {
 	public void userCanTransferMoneyFromOneAccountToAnother(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -69,7 +69,7 @@ public class TransferMoneyTest extends BaseUITest {
 	public void UserCantTransferMoneyFromOneAccountToAnotherWithNotCorrectSum(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
@@ -116,7 +116,7 @@ public class TransferMoneyTest extends BaseUITest {
 	public void userCanSeeTrackingOfTheirAccounts(){
 		// создаем пользователя и логинимся
 		CreateUserRequest createUserRequest = AdminSteps.createUser();
-		authAsUser(createUserRequest);
+		//authAsUser(createUserRequest);
 
 		// создаем счет 1
 		CreateAccountResponse createAccountResponse1 = UserCreateAccount.userCreateAccount(createUserRequest);
