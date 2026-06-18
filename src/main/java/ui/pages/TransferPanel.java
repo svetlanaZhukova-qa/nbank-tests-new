@@ -16,7 +16,11 @@ import static com.codeborne.selenide.Selenide.$$;
 
 public class TransferPanel extends BasePage<TransferPanel>{
 
-	private final AccountSelector accountSelector = new AccountSelector();
+	private final AccountSelector accountSelector;
+
+	public TransferPanel() {
+		this.accountSelector = new AccountSelector($("select.account-selector"));
+	}
 
 	//  Создание трансфера
 	private SelenideElement recipientAccount = $(byAttribute("placeholder", "Enter recipient account number"));

@@ -10,7 +10,11 @@ public class DepositPanel extends BasePage<DepositPanel> {
 
 
 	private SelenideElement depositButtton = $(byText("\uD83D\uDCB5 Deposit"));
-	private final AccountSelector accountSelector = new AccountSelector();
+	private final AccountSelector accountSelector;
+
+	public DepositPanel() {
+		this.accountSelector = new AccountSelector($("select.account-selector"));
+	}
 
 	@Override
 	public String url() {
