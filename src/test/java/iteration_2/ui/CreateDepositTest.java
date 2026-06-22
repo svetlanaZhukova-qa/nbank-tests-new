@@ -7,8 +7,8 @@ import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResp
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.CrudRequester;
+import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import api.iteration_2.requests.steps.AdminSteps;
-import api.iteration_2.requests.steps.GetUserInfo;
 import api.iteration_2.requests.steps.UserCreateAccount;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
@@ -46,13 +46,23 @@ public class CreateDepositTest extends BaseUITest {
 				.checkAlertMessageAndAccept(BankAlert.SUCCESSFULLY_DEPOSITED, depositAmount, accountNumber);
 
 		// проверка, что депозит создан на API
-		List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+		// проверка через десериализацию объекта
+		InfoGetUserResponse userInfo = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
+				Endpoint.USER_INFO
+		).get();
 
-		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
-		assertThat(account.get().getBalance()).isEqualTo(depositAmount);
-		assertThat(account.get().getId()).isEqualTo(idAccount);
+		// Получаем счета из десериализованного объекта
+		List<Account> accounts = userInfo.getAccounts();
+
+		Account account = accounts.stream()
+				.filter(a -> a.getId() == idAccount)
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("Account with id " + idAccount + " not found"));
+
+		assertThat(account.getBalance()).isEqualTo(depositAmount);
+		assertThat(account.getId()).isEqualTo(idAccount);
 
 	}
 
@@ -75,9 +85,15 @@ public class CreateDepositTest extends BaseUITest {
 				.checkAlertMessageAndAccept(BankAlert.FAILED_DEPOSIT);
 
 		// проверка, что депозит не создан на API
-	    List<Account> accounts = new CrudRequester(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+		// проверка через десериализацию объекта
+		InfoGetUserResponse userInfo = new ValidateCrudRequester2<InfoGetUserResponse>(
+				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
 				ResponseSpecs.requestReturnOk(),
-				Endpoint.USER_INFO).get().extract().jsonPath().getList("accounts", Account.class);;
+				Endpoint.USER_INFO
+		).get();
+
+		// Получаем счета из десериализованного объекта
+		List<Account> accounts = userInfo.getAccounts();
 
 		Optional<Account> account = accounts.stream().filter(a -> a.getId() == idAccount).findFirst();
 		assertThat(account.get().getBalance()).isEqualTo(0);

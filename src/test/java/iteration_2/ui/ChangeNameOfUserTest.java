@@ -48,7 +48,7 @@ public class ChangeNameOfUserTest extends BaseUITest {
 	    new UserDashboard().open().updateName(createUserRequest, newName)
 				.checkAlertMessageAndAccept(BankAlert.FAILED_CHANGE_NAME);
 
-		// проверяем что на API имя  не изменилось
+		// проверяем что на API имя не изменилось
 		InfoGetUserResponse infoGetUserResponse = GetUserInfo.getInfo(createUserRequest);
 		assertEquals(infoGetUserResponse.getName(), null);
 

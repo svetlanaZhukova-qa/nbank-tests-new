@@ -5,6 +5,7 @@ import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
+import api.iteration_2.models_body_JSON.transfer_money.TransactionType;
 import api.iteration_2.requests.steps.*;
 import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
@@ -136,9 +137,9 @@ public class TransferMoneyTest extends BaseUITest {
 				.getAllTransactions(createUserRequest)
 				.checkTransactionsHeaderVisible()
 				.checkTransactionsCount(3)
-				.checkTransactionExists("DEPOSIT", deposit)
-				.checkTransactionExists("TRANSFER_OUT", deposit)
-				.checkTransactionExists("TRANSFER_IN", deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.DEPOSIT), deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.TRANSFER_OUT), deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.TRANSFER_IN), deposit)
 				.checkAllTransactionsHaveRepeatButton();
 
 	}
