@@ -2,8 +2,6 @@ package iteration_2.ui;
 
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
-import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
-import api.iteration_2.requests.steps.AdminSteps;
 import api.iteration_2.requests.steps.GetUserInfo;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import ui.pages.BankAlert;
 import ui.pages.UserDashboard;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")

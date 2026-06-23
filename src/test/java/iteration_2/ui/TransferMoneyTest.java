@@ -4,6 +4,7 @@ import api.iteration_2.data.Account;
 import api.iteration_2.generators.RandomData;
 import api.iteration_2.models_body_JSON.change_name_user.InfoGetUserResponse;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateAccountResponse;
+import api.iteration_2.models_body_JSON.transfer_money.TransactionType;
 import api.iteration_2.requests.steps.GetUserInfo;
 import api.iteration_2.requests.steps.UserCreateAccount;
 import api.iteration_2.requests.steps.UserCreateDeposit;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import ui.pages.BankAlert;
 import ui.pages.TransferPanel;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
@@ -137,9 +137,9 @@ public class TransferMoneyTest extends BaseUITest {
 				.getAllTransactions(SessionStorage.getUser(1))
 				.checkTransactionsHeaderVisible()
 				.checkTransactionsCount(3)
-				.checkTransactionExists("DEPOSIT", deposit)
-				.checkTransactionExists("TRANSFER_OUT", deposit)
-				.checkTransactionExists("TRANSFER_IN", deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.DEPOSIT), deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.TRANSFER_OUT), deposit)
+				.checkTransactionExists(String.valueOf(TransactionType.TRANSFER_IN), deposit)
 				.checkAllTransactionsHaveRepeatButton();
 
 	}
@@ -147,6 +147,5 @@ public class TransferMoneyTest extends BaseUITest {
 	private static int getMaxDeposit(){
 		return 5000;
 	}
-
 
 }

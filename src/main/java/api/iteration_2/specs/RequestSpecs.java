@@ -46,7 +46,9 @@ public class RequestSpecs {
 	}
 
 	public static RequestSpecification adminSpec(){
-		return defaultRequestBuilder().addHeader("Authorization", "Basic YWRtaW46YWRtaW4=").build();
+		return defaultRequestBuilder()
+				.addHeader("Authorization", "Basic YWRtaW46YWRtaW4=")
+				.build();
 	}
 
 	public static RequestSpecification authUserSpec(String username, String password){

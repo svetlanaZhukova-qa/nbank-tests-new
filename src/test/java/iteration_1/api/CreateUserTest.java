@@ -7,6 +7,7 @@ import api.iteration_1.models.comparison.ModelAssertions;
 import api.iteration_1.requests.skelethon.Endpoint;
 import api.iteration_1.requests.skelethon.requestsers.CrudRequester;
 import api.iteration_1.requests.skelethon.requestsers.ValidateCRUDRequester;
+import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

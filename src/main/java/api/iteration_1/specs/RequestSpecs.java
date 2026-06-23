@@ -26,7 +26,7 @@ public class RequestSpecs {
 				.setAccept(ContentType.JSON)
 				.addFilters( List.of(new RequestLoggingFilter(),
 						new ResponseLoggingFilter()))
-				.setBaseUri(Config.getProperty("server") + Config.getProperty("apiVersion"));
+				.setBaseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"));
 	}
 
 	public static RequestSpecification unauthSpec() {
@@ -35,7 +35,7 @@ public class RequestSpecs {
 
 	public static RequestSpecification adminSpec() {
 		return defaultRequestBuilder()
-				.addHeader("Authorization", authHeader.get("admin"))
+				.addHeader("Authorization", "Basic YWRtaW46YWRtaW4=")
 				.build();
 	}
 
