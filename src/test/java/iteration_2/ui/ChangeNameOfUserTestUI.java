@@ -14,7 +14,7 @@ import ui.pages.UserDashboard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на возможность изменить имя профиля пользователем")
-public class ChangeNameOfUserTest extends BaseUITest {
+public class ChangeNameOfUserTestUI extends BaseUITest {
 	@Test
 	@Tag("positive")
 	@DisplayName("Пользователь может меня свое имя в профиле.")

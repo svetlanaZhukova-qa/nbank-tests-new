@@ -20,7 +20,7 @@ import ui.pages.TransferPanel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
-public class TransferMoneyTest extends BaseUITest {
+public class TransferMoneyTestUI extends BaseUITest {
 	@Test
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой")
 	@Tag("positive")

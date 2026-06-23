@@ -22,7 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("Тесты на проверку возможности создания Депозита")
-public class CreateDepositTest extends BaseUITest {
+public class CreateDepositTestUI extends BaseUITest {
 
 	@Test
 	@DisplayName("Пользователь может делать депозит")
