@@ -15,13 +15,16 @@ import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import ui.pages.BankAlert;
 import ui.pages.DepositPanel;
 import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@DisplayName("Тесты на проверку возможности создания Депозита")
+@DisplayName("Тесты на проверку возможности создания Депозита UI")
+@Execution(ExecutionMode.SAME_THREAD)
 public class CreateDepositTestUI extends BaseUITest {
 
 	@Test

@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 // — Сумма должна быть положительной и не превышать баланс отправителя
 // — Можно переводить между своими аккаунтами и чужими
 
-@DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
+@DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой API")
 public class TransferMoneyTest extends BaseTest {
 
 	@ParameterizedTest

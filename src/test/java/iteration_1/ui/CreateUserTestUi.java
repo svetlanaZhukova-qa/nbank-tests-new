@@ -2,13 +2,12 @@ package iteration_1.ui;
 
 import api.iteration_1.generators.RandomModelGenerator;
 import api.iteration_1.models.comparison.ModelAssertions;
-import api.iteration_2.generators.RandomModelGenerator2Iteration;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import api.iteration_2.requests.steps.AdminSteps;
-import com.codeborne.selenide.Condition;
 import common.annotations.AdminSession;
 import org.junit.jupiter.api.Test;
+import ui.elements.UserBage;
 import ui.pages.AdminPanel;
 import ui.pages.BankAlert;
 
@@ -16,16 +15,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class CreateUserTest extends BaseUITest{
+public class CreateUserTestUi extends BaseUITest{
 
 	@Test
 	@AdminSession
 	public void adminCanCreateUser(){
 		CreateUserRequest newUser = RandomModelGenerator.generate(CreateUserRequest.class);
 
-		assertTrue(new AdminPanel().open().createUser(newUser.getUsername(), newUser.getPassword())
+		UserBage newUserBage = new AdminPanel().open().createUser(newUser.getUsername(), newUser.getPassword())
 				.checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY)
-				.getAllUsers().stream().anyMatch(userBage -> userBage.getUsername().equals(newUser.getUsername())));
+				.findUserByUsername(newUser.getUsername());
+
+		assertThat(newUserBage)
+				.as("UserBage should exist on Dashboard after user creation").isNotNull();
 
 		CreateUserResponse createdUser = AdminSteps.getAllUsers().stream()
 				.filter(user -> user.getUsername().equals(newUser.getUsername()))

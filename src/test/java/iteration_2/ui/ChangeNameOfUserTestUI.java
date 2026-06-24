@@ -9,11 +9,14 @@ import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import ui.pages.BankAlert;
 import ui.pages.UserDashboard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Тесты на возможность изменить имя профиля пользователем")
+@DisplayName("Тесты на возможность изменить имя профиля пользователем UI")
+@Execution(ExecutionMode.SAME_THREAD)
 public class ChangeNameOfUserTestUI extends BaseUITest {
 	@Test
 	@Tag("positive")

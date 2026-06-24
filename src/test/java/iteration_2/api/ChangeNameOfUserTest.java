@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 // Изменение имени пользователя
 // Имя в профиле (name):
 //— Два слова, состоящее из букв, разделенные пробелом
-@DisplayName("Тесты на возможность изменить имя профиля пользователем")
+@DisplayName("Тесты на возможность изменить имя профиля пользователем API")
 public class ChangeNameOfUserTest extends BaseTest {
 
 	@Test

@@ -15,11 +15,14 @@ import iteration_1.ui.BaseUITest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import ui.pages.BankAlert;
 import ui.pages.TransferPanel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой")
+@DisplayName("Тесты на проверку возможности перевода денег с одного счета на другой UI")
+@Execution(ExecutionMode.SAME_THREAD)
 public class TransferMoneyTestUI extends BaseUITest {
 	@Test
 	@DisplayName("Пользователь может переводить деньги с одного счета на другой")

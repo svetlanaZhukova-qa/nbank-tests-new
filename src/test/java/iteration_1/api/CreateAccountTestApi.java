@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import api.iteration_1.specs.RequestSpecs;
 import api.iteration_1.specs.ResponseSpecs;
 
-public class CreateAccountTest extends BaseTest {
+public class CreateAccountTestApi extends BaseTest {
 
 	@Test
 	public void userCanCreateAccountTest() {
@@ -17,7 +17,6 @@ public class CreateAccountTest extends BaseTest {
 
 		new CrudRequester(RequestSpecs.authAsUser(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.entityWasCreated(),
 				Endpoint.ACCOUNTS);
-
 
 	}
 }

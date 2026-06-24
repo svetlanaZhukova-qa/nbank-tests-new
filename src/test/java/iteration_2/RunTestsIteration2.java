@@ -18,6 +18,6 @@ import org.junit.platform.suite.api.Suite;
 		CreateDepositTestUI.class,
 		TransferMoneyTestUI.class
 })
-public class RunTests {
+public class RunTestsIteration2 {
 
 }
