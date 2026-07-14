@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import api.iteration_1.specs.RequestSpecs;
 import api.iteration_1.specs.ResponseSpecs;
 
-public class LoginUserTestApi extends BaseTest {
+public class LoginUserTest extends BaseTest {
 
 	@Test
 	public void adminCanGenerateAuthTokenTest() {

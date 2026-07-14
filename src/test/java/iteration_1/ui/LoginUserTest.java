@@ -12,7 +12,7 @@ import ui.pages.UserDashboard;
 
 
 
-public class LoginUserTestUi extends BaseUITest {
+public class LoginUserTest extends BaseUITest {
 
 	@Test
 	@Browsers({"firefox"})

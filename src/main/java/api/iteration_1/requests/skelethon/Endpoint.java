@@ -15,7 +15,10 @@ public enum Endpoint {
 	),
 	LOGIN_USER(
 			"/auth/login", LoginUserRequest.class, LoginUserResponse.class
-	);
+	),
+	CUSTOMER_ACCOUNTS("/customer/accounts",
+		BaseModel.class,
+		CreateAccountResponse.class);
 
 	private final String url;
 	private final Class<? extends BaseModel> requestModel;

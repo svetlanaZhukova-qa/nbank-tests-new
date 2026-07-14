@@ -1,5 +1,6 @@
 package api.iteration_1.requests.skelethon.requestsers;
 
+import api.iteration_1.requests.skelethon.interfaces.GetAllEndpoint;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import api.iteration_1.models.BaseModel;
@@ -7,7 +8,10 @@ import api.iteration_1.requests.skelethon.Endpoint;
 import api.iteration_1.requests.skelethon.HttpRequest;
 import api.iteration_1.requests.skelethon.interfaces.CRUDEndpointInterface;
 
-public class ValidateCRUDRequester<T extends BaseModel> extends HttpRequest implements CRUDEndpointInterface {
+import java.util.Arrays;
+import java.util.List;
+
+public class ValidateCRUDRequester<T extends BaseModel> extends HttpRequest implements CRUDEndpointInterface, GetAllEndpoint {
 	private CrudRequester crudRequester;
 	public ValidateCRUDRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification, Endpoint endpoint) {
 		super(requestSpecification, responseSpecification, endpoint);
@@ -32,5 +36,12 @@ public class ValidateCRUDRequester<T extends BaseModel> extends HttpRequest impl
 	@Override
 	public Object delete(long id) {
 		return null;
+	}
+
+
+	@Override
+	public List<T> getAll(Class<?> clazz) {
+		T[] array = (T[]) crudRequester.getAll(clazz).extract().as(clazz);
+		return Arrays.asList(array);
 	}
 }

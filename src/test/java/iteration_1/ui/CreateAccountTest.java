@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CreateAccountTestUi extends BaseUITest{
+public class CreateAccountTest extends BaseUITest {
 	@Test
 	@UserSession
 	public void userCanCreateAccountTest() {

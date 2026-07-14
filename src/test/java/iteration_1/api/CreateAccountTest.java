@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class CreateAccountTestApi extends BaseTest {
+public class CreateAccountTest extends BaseTest {
 
 	@Test
 	public void userCanCreateAccountTest() {

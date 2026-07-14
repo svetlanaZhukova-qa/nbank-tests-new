@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class CreateUserTestApi extends BaseTest {
+public class CreateUserTest extends BaseTest {
 	@Test
 	public void adminCanCreateUserWithCorrectData() {
 		// Подготовка данных
