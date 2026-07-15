@@ -1,5 +1,14 @@
 #!/bin/bash
 
+echo ">>> Определяем архитектуру"
+ARCH=$(uname -m)
+if [ "$ARCH" = "arm64" ]; then
+    BROWSERS_FILE="./config/browsers.json"
+else
+    BROWSERS_FILE="./config/browsers-ci.json"
+fi
+echo "Architecture: $ARCH, using $BROWSERS_FILE"
+
 echo ">>> Остановить Docker Compose"
 docker compose down
 
@@ -15,7 +24,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # Извлекаем все значения .image через jq
-images=$(jq -r '.. | objects | select(.image) | .image' "$json_file")
+images=$(jq -r '.. | objects | select(.image) | .image' "$BROWSERS_FILE")
 
 # Пробегаем по каждому образу и выполняем docker pull
 for image in $images; do
