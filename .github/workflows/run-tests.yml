@@ -28,6 +28,25 @@ jobs: # аналог этапов
       - name: Set up services
         run: cd "infra /docker_compose" && bash restart-docker.sh && cd ../..
 
+      - name: Debug Selenoid
+        run: |
+          echo "=== Selenoid status ==="
+          curl -s http://localhost:4444/status || echo "Selenoid not responding"
+          echo ""
+          echo "=== Docker images ==="
+          docker images
+          echo ""
+          echo "=== Docker containers ==="
+          docker ps
+          echo ""
+          echo "=== Docker networks ==="
+          docker network ls
+          echo ""
+          echo "=== Check browser image ==="
+          docker pull selenoid/vnc_chrome:91.0 || echo "Failed to pull browser image"
+
+
+
       - name: Run tests
         run: ./mvnw test -Dtest=CreateDepositTestUI -q
         env:
