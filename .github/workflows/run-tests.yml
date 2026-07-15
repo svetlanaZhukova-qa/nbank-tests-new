@@ -52,3 +52,4 @@ jobs: # аналог этапов
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
+          BROWSER_VERSION: "120.0"

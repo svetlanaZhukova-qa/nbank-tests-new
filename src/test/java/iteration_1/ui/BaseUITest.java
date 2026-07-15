@@ -28,7 +28,13 @@ public class BaseUITest extends BaseTest {
 		Configuration.remote = Config.getProperty("uiRemote");
 		Configuration.baseUrl = Config.getProperty("uiBaseUrl");
 		Configuration.browser = Config.getProperty("browser");
-		Configuration.browserVersion = Config.getProperty("browserVersion");
+		//Configuration.browserVersion = Config.getProperty("browserVersion");//замена из-за разных версий браузера и в CI
+		String envVersion = System.getenv("BROWSER_VERSION");
+		String configVersion = Config.getProperty("browserVersion");
+		Configuration.browserVersion = (envVersion != null && !envVersion.isEmpty())
+				? envVersion
+				: configVersion;
+
 		Configuration.browserSize =  Config.getProperty("browserSize");
 		Configuration.headless = true;// настройка для запуска ui-автотестов без поднятия сессии
 
