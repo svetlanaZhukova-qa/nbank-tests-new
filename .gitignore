@@ -35,4 +35,7 @@ build/
 .vscode/
 
 ### Mac OS ###
+.DS_Storeallure-results/
+test-output-iteration2/
+.DS_Store
 .DS_Store

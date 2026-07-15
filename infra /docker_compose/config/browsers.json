@@ -1,16 +1,12 @@
 {
     "chrome": {
-        "default": "latest",
+        "default": "chrome",
         "versions": {
-            "latest": {
-                "image": "selenoid/chrome:latest",
+            "91.0": {
+                "image": "dumbdumbych/selenium_vnc_chrome_arm64:91.0.b",
                 "port": "4444",
-                "path": "/"
-            },
-            "125.0": {
-                "image": "selenoid/chrome:125.0",
-                "port": "4444",
-                "path": "/"
+                "path": "/",
+                "privileged": true
             }
         }
     },
