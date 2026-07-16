@@ -1,5 +1,6 @@
 package api.iteration_1.requests.skelethon.requestsers;
 
+import api.configs.Config;
 import api.iteration_1.requests.skelethon.interfaces.GetAllEndpoint;
 import common.helpers.StepLogger;
 import io.qameta.allure.Step;
@@ -14,6 +15,8 @@ import api.iteration_1.requests.skelethon.interfaces.CRUDEndpointInterface;
 import static io.restassured.RestAssured.given;
 
 public class CrudRequester extends HttpRequest implements CRUDEndpointInterface, GetAllEndpoint {
+	public final static String API_VERSION = Config.getProperty("apiVersion");
+
 	public CrudRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification, Endpoint endpoint) {
 		super(requestSpecification, responseSpecification, endpoint);
 	}
@@ -25,7 +28,7 @@ public class CrudRequester extends HttpRequest implements CRUDEndpointInterface,
 			return  given()
 					.spec(requestSpecification)
 					.body(body)
-					.post(endpoint.getUrl())
+					.post(API_VERSION + endpoint.getUrl())
 					.then()
 					.assertThat()
 					.spec(responseSpecification);
@@ -52,7 +55,7 @@ public class CrudRequester extends HttpRequest implements CRUDEndpointInterface,
 	public ValidatableResponse getAll(Class<?> clazz) {
 		return given()
 				.spec(requestSpecification)
-				.get(endpoint.getUrl())
+				.get(API_VERSION + endpoint.getUrl())
 				.then().assertThat()
 				.spec(responseSpecification);
 	}

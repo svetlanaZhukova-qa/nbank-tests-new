@@ -28,24 +28,6 @@ jobs: # аналог этапов
       - name: Set up services
         run: cd "infra /docker_compose" && bash restart-docker.sh && cd ../..
 
-      - name: Debug Selenoid
-        run: |
-          echo "=== Selenoid status ==="
-          curl -s http://localhost:4444/status || echo "Selenoid not responding"
-          echo ""
-          echo "=== Docker images ==="
-          docker images
-          echo ""
-          echo "=== Docker containers ==="
-          docker ps
-          echo ""
-          echo "=== Docker networks ==="
-          docker network ls
-          echo ""
-          echo "=== Check browser image ==="
-          docker pull selenoid/vnc_chrome:91.0 || echo "Failed to pull browser image"
-
-
 
       - name: Run tests
         run: ./mvnw test -Dtest=ChangeNameOfUserTestUI -q
@@ -53,3 +35,38 @@ jobs: # аналог этапов
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
           BROWSER_VERSION: "120.0"
+
+      - name: Run Swagger coverage
+        if: always()
+        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
+
+      - name: Load test report history
+        uses: actions/checkout@v2
+        if: always()
+        with:
+            ref: gh-pages
+            path: gh-pages
+
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+            gh_pages: gh-pages
+            allure_results: target/allure-results
+            allure_history: allure-history
+
+      - name: Build Swagger coverage report
+        if: always()
+        run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
+
+      - name: Publish test report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_branch: gh-pages
+            publish_dir: allure-history
+
+      - name: Clean up services
+        if: always()
+        run: cd infra/docker_compose && docker compose down
