@@ -3,6 +3,8 @@ package api.iteration_2.requests.skelethon.requesters;
 import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserResponse;
 import api.iteration_2.requests.skelethon.interfaces.GetAllEndpointInterface;
 import api.iteration_2.specs.RequestSpecs;
+import common.helpers.StepLogger;
+import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -21,46 +23,48 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface,
 
 	@Override
 	public ValidatableResponse post(BaseModel baseModel) {
-		var body = baseModel == null ? "" : baseModel;
-		return given()
-				.spec(requestSpecification)
-				.body(body)
-				.post(endpoint.getUrl())
-				.then()
-				.assertThat()
-				.spec(responseSpecification);
+	return 	StepLogger.log("POST request from " + endpoint.getUrl(), () -> {var body = baseModel == null ? "" : baseModel;
+			return given()
+					.spec(requestSpecification)
+					.body(body)
+					.post(endpoint.getUrl())
+					.then()
+					.assertThat()
+					.spec(responseSpecification);});
 	}
 
 	@Override
 	public ValidatableResponse getWithParams(int id) {
-		return given()
+		return StepLogger.log("GET request with params id from " + endpoint.getUrl(), () -> {return given()
 				.spec(requestSpecification)
 				.pathParam("id", id)
 				.get(endpoint.getUrl())
 				.then()
 				.assertThat()
-				.spec(responseSpecification);
+				.spec(responseSpecification);});
 	}
 
 	@Override
 	public ValidatableResponse get() {
-		return given()
+		return StepLogger.log("GET request from " + endpoint.getUrl(), () -> {return given()
 				.spec(requestSpecification)
 				.get(endpoint.getUrl())
 				.then()
 				.assertThat()
-				.spec(responseSpecification);
+				.spec(responseSpecification);});
+
 }
 
 	@Override
 	public ValidatableResponse update(BaseModel baseModel) {
-		return given()
+		return StepLogger.log("PUT request from " + endpoint.getUrl(), () -> {return given()
 				.spec(requestSpecification)
 				.body(baseModel)
 				.put(endpoint.getUrl())
 				.then()
 				.assertThat()
-				.spec(responseSpecification);
+				.spec(responseSpecification);});
+
 	}
 
 	@Override

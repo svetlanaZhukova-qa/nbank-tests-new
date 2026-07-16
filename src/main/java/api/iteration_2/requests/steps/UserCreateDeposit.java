@@ -8,26 +8,28 @@ import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 
 public class UserCreateDeposit {
 
 	public static DepositPair createDeposit(CreateUserRequest createUserRequest, CreateAccountResponse createAccountResponse, int deposit){
-		// Создаем объект запроса
-		CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
-				.id(createAccountResponse.getId())
-				.balance(deposit)
-				.build();
+		return StepLogger.log("User create deposit", () -> {// Создаем объект запроса
+			CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+					.id(createAccountResponse.getId())
+					.balance(deposit)
+					.build();
 
-		// Отправляем запрос и получаем ответ
-		CreateDepositResponse createDepositResponse = new ValidateCrudRequester2<CreateDepositResponse>(
-				RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-				ResponseSpecs.requestReturnOk(),
-				Endpoint.DEPOSIT
-		).post(createDepositRequest);
+			// Отправляем запрос и получаем ответ
+			CreateDepositResponse createDepositResponse = new ValidateCrudRequester2<CreateDepositResponse>(
+					RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+					ResponseSpecs.requestReturnOk(),
+					Endpoint.DEPOSIT
+			).post(createDepositRequest);
 
-		// Возвращаем пару объектов
-		return new DepositPair(createDepositRequest, createDepositResponse);
+			// Возвращаем пару объектов
+			return new DepositPair(createDepositRequest, createDepositResponse);});
+
 	}
 
 	public static class DepositPair {

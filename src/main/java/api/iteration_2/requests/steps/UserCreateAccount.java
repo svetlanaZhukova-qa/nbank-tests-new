@@ -6,14 +6,16 @@ import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 public class UserCreateAccount {
 
 	public static CreateAccountResponse userCreateAccount(CreateUserRequest createUserRequest){
-CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>
-		(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword())
-		, ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
-return createAccountResponse;
+		return StepLogger.log("User create account", () -> {CreateAccountResponse createAccountResponse = new ValidateCrudRequester2<CreateAccountResponse>
+				(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword())
+						, ResponseSpecs.entityWasCreated(), Endpoint.ACCOUNT).post(null);
+			return createAccountResponse;});
+
 	}
 
 }

@@ -6,6 +6,7 @@ import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 public class GetUserInfo {
 	// 	// запрашиваем информацию профиля
@@ -13,10 +14,11 @@ public class GetUserInfo {
 	//				ResponseSpecs.requestReturnOk(),
 	//				Endpoint.USER_INFO).get();
 	public static InfoGetUserResponse getInfo(CreateUserRequest createUserRequest){
-		InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>
+		return StepLogger.log("Get info user ", () -> {	InfoGetUserResponse infoGetUserResponse = new ValidateCrudRequester2<InfoGetUserResponse>
 				(RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-								ResponseSpecs.requestReturnOk(),
-								Endpoint.USER_INFO).get();
-		return infoGetUserResponse;
+						ResponseSpecs.requestReturnOk(),
+						Endpoint.USER_INFO).get();
+			return infoGetUserResponse;});
+
 	}
 }

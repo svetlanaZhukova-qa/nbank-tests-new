@@ -8,6 +8,7 @@ import api.iteration_2.requests.skelethon.Endpoint;
 import api.iteration_2.requests.skelethon.requesters.ValidateCrudRequester2;
 import api.iteration_2.specs.RequestSpecs;
 import api.iteration_2.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 public class UserCreateTransfer {
 	// 	// переводим деньги с одного счета на другой
@@ -19,13 +20,14 @@ public class UserCreateTransfer {
 	//				Endpoint.TRANSFER
 	//		).post(createTransferRequest);
 	public static CreateTransferResponse createTransfer(CreateUserRequest createUserRequest, CreateAccountResponse createAccountResponse1, CreateAccountResponse createAccountResponse2, int sum){
-				CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(createAccountResponse1.getId())
-						.receiverAccountId(createAccountResponse2.getId()).amount(sum).build();
-				CreateTransferResponse createTransferResponse = new ValidateCrudRequester2<CreateTransferResponse>(
-						RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
-						ResponseSpecs.requestReturnOk(),
-						Endpoint.TRANSFER
-				).post(createTransferRequest);
-				return createTransferResponse;
+		return StepLogger.log("User create transfer", () -> {CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(createAccountResponse1.getId())
+				.receiverAccountId(createAccountResponse2.getId()).amount(sum).build();
+			CreateTransferResponse createTransferResponse = new ValidateCrudRequester2<CreateTransferResponse>(
+					RequestSpecs.authUserSpec(createUserRequest.getUsername(), createUserRequest.getPassword()),
+					ResponseSpecs.requestReturnOk(),
+					Endpoint.TRANSFER
+			).post(createTransferRequest);
+			return createTransferResponse;});
+
 	}
 }

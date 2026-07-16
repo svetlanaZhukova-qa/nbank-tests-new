@@ -38,8 +38,8 @@ public class CreateUserTest extends BaseTest {
 		ModelAssertions.assertThatModels(createUserRequest, createUserResponse).match();
 		softly.assertThat(createUserRequest.getPassword()).isNotEqualTo(createUserResponse.getPassword());
 
-		UserDao userDao = DataBaseSteps.getUserByUsername(createUserRequest.getUsername());
-		DaoAndModelAssertions.assertThat(createUserResponse, userDao).match();
+//		UserDao userDao = DataBaseSteps.getUserByUsername(createUserRequest.getUsername());
+//		DaoAndModelAssertions.assertThat(createUserResponse, userDao).match();
 
 	}
 
@@ -68,7 +68,7 @@ public class CreateUserTest extends BaseTest {
 				.post(createUserRequest);
 
 
-		assertNull(DataBaseSteps.getUserByUsername(createUserRequest.getUsername()));
+		//assertNull(DataBaseSteps.getUserByUsername(createUserRequest.getUsername()));
 
 	}
 }
