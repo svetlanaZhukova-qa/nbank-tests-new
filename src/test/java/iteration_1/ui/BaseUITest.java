@@ -5,10 +5,12 @@ import api.iteration_2.models_body_JSON.create_user_and_accont.CreateUserRequest
 import api.iteration_2.specs.RequestSpecs;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
 import common.extensions.AdminSessionExtension;
 import common.extensions.BrowserMatchExtension;
 import common.extensions.TimingExtension;
 import common.extensions.UserSessionExtension;
+import io.qameta.allure.selenide.AllureSelenide;
 import iteration_2.api.BaseTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +38,7 @@ public class BaseUITest extends BaseTest {
 				: configVersion;
 
 		Configuration.browserSize =  Config.getProperty("browserSize");
+		SelenideLogger.addListener("AllureSelenide", new AllureSelenide());
 		Configuration.headless = true;// настройка для запуска ui-автотестов без поднятия сессии
 
 		Map<String, Object> selenoidOptions = new HashMap<>();
