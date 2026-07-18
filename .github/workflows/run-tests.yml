@@ -1,13 +1,14 @@
 name: Run tests
 
-on: [push, workflow_dispatch]
+# триггер
+on: [ push, workflow_dispatch ]
 
-jobs:
+jobs: # аналог этапов
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
+    steps: # шаги конкретной job
+      - name: Checkout repository # копируем файлы репозитория внутрь CI агента
         uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -24,18 +25,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Install Swagger Coverage
-        run: |
-          unzip -o swagger-coverage-1.5.0.zip -d swagger-coverage-temp
-          mkdir -p .swagger-coverage-commandline
-          cp -r swagger-coverage-temp/swagger-coverage-1.5.0/* .swagger-coverage-commandline/
-          chmod +x .swagger-coverage-commandline/bin/swagger-coverage-commandline
-
       - name: Set up services
-        run: |
-          cd infra/docker_compose
-          bash restart-docker.sh
-        continue-on-error: false
+        run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
 
       - name: Run tests
         run: ./mvnw clean test -q
@@ -49,39 +40,32 @@ jobs:
         run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
 
       - name: Load test report history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         if: always()
         with:
           ref: gh-pages
           path: gh-pages
 
       - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
         if: always()
-        run: |
-          wget -q https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
-          tar -xzf allure-2.27.0.tgz
-          mkdir -p allure-history
-          cp -r gh-pages/* allure-history/ 2>/dev/null || true
-          ./allure-2.27.0/bin/allure generate target/allure-results -o allure-history/${{ github.run_number }} --clean
-          ./allure-2.27.0/bin/allure generate target/allure-results -o allure-history/latest --clean
+        with:
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_history: allure-history
 
       - name: Build Swagger coverage report
         if: always()
-        run: |
-          mkdir -p allure-history/${{ github.run_number }}
-          cp swagger-coverage-report.html allure-history/${{ github.run_number }}/swagger-coverage-report.html || true
+        run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
 
       - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-          keep_files: true
 
       - name: Clean up services
         if: always()
-        run: |
-          cd infra/docker_compose
-          docker compose down
+        run: cd infra/docker_compose && docker compose down
