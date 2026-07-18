@@ -32,7 +32,7 @@ jobs:
 
       - name: Set up services
         working-directory: infra/docker_compose
-        run: bash restart_docker.sh
+        run: bash restart-docker.sh
 
       - name: Run tests
         run: ./mvnw clean test -q
