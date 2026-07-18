@@ -4,10 +4,10 @@ on: [push, workflow_dispatch]
 
 jobs:
   run-tests:
-    name: Set up services (review apps) and run tests
+    name: Set up services and run tests
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Обязательно для публикации в gh-pages
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -27,13 +27,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # === НОВЫЙ ШАГ: установка Allure через официальное действие ===
       - name: Setup Allure
-        uses: sudo npm install -g allure-commandline
+        run: sudo npm install -g allure-commandline
 
       - name: Set up services
-        working-directory: infra/docker_compose   # ← правильно вместо cd
-        run: bash restart-docker.sh
+        working-directory: infra/docker_compose
+        run: bash restart_docker.sh
 
       - name: Run tests
         run: ./mvnw clean test -q
@@ -44,46 +43,35 @@ jobs:
 
       - name: Run Swagger coverage
         if: always()
-        continue-on-error: true                   # ← не роняет整个 workflow
+        continue-on-error: true
         run: |
           if [ -f .swagger-coverage-commandline/bin/swagger-coverage-commandline ]; then
             .swagger-coverage-commandline/bin/swagger-coverage-commandline \
               -s http://localhost:4111/v3/api-docs \
               -i target/swagger-coverage-output
           else
-            echo "⚠️ swagger-coverage-commandline не найден — шаг пропущен"
+            echo "swagger-coverage-commandline not found, skipping"
           fi
 
       - name: Load test report history
-        uses: actions/checkout@v4                 # ← v2 → v4
+        uses: actions/checkout@v4
         if: always()
         with:
           ref: gh-pages
           path: gh-pages
 
-      # === НОВАЯ генерация отчёта через allure CLI ===
       - name: Generate Allure report
         if: always()
         run: |
           mkdir -p allure-history
-
-          # Копируем историю из предыдущего отчёта (для трендов)
           if [ -d gh-pages/latest/history ]; then
             mkdir -p target/allure-results/history
             cp -r gh-pages/latest/history/* target/allure-results/history/
           fi
-
-          # Генерируем отчёт для текущего запуска
-          allure generate target/allure-results \
-            -o allure-history/${{ github.run_number }} --clean
-
-          # Обновляем "latest" → текущий отчёт
+          allure generate target/allure-results -o allure-history/${{ github.run_number }} --clean
           rm -rf allure-history/latest
           cp -r allure-history/${{ github.run_number }} allure-history/latest
-
-          # index.html в корне — редирект на latest (решает проблему 404)
-          echo '<meta http-equiv="refresh" content="0; url=latest/index.html">' \
-            > allure-history/index.html
+          echo '<meta http-equiv="refresh" content="0; url=latest/index.html">' > allure-history/index.html
 
       - name: Add Swagger coverage report
         if: always()
@@ -94,15 +82,15 @@ jobs:
           fi
 
       - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v4       # ← v3 → v4
+        uses: peaceiris/actions-gh-pages@v4
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-          keep_files: true                         # ← сохранять предыдущие отчёты
+          keep_files: true
 
       - name: Clean up services
         if: always()
-        working-directory: infra/docker_compose   # ← правильно вместо cd
+        working-directory: infra/docker_compose
         run: docker compose down
