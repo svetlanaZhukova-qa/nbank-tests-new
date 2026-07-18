@@ -7,11 +7,8 @@ jobs: # аналог этапов
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # даем права на запись в репозиторий для публикации в gh-pages
-
     steps: # шаги конкретной job
-      - name: Checkout repository
+      - name: Checkout repository # копируем файлы репозитория внутрь CI агента
         uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -19,11 +16,6 @@ jobs: # аналог этапов
         with:
           distribution: 'corretto'
           java-version: '21'
-
-      - name: Set up Node.js # Нужен для установки Allure
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
 
       - name: Cache Maven repository
         uses: actions/cache@v4
@@ -34,51 +26,36 @@ jobs: # аналог этапов
             ${{ runner.os }}-maven-
 
       - name: Set up services
-        run: cd infra/docker_compose && bash restart-docker.sh && cd ../..
+        run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
 
       - name: Run tests
-        run: ./mvnw test -Dtest=ChangeNameOfUserTestUI -q
+        run: ./mvnw clean test -q
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
-          BROWSER_VERSION: "120.0"
+          APIVERSION: /api/v1
 
       - name: Run Swagger coverage
         if: always()
-        continue-on-error: true
         run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
 
       - name: Load test report history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         if: always()
         with:
           ref: gh-pages
           path: gh-pages
 
       - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
         if: always()
-        run: |
-          sudo npm install -g allure-commandline
-          # Копируем историю из предыдущих запусков (если она есть)
-          if [ -d gh-pages/history ]; then
-            mkdir -p target/allure-results/history
-            cp -r gh-pages/history target/allure-results/history
-          fi
-          # Генерируем отчет
-          allure generate target/allure-results -o allure-report
-          # Копируем сгенерированный отчет в папку с номером текущего запуска
-          mkdir -p allure-history
-          cp -r allure-report allure-history/${{ github.run_number }}
-          # Сохраняем историю для будущих запусков
-          if [ -d target/allure-results/history ]; then
-            cp -r target/allure-results/history allure-history/history
-          fi
-          # Создаем index.html, который будет автоматически перенаправлять на последний запуск
-          echo '<meta http-equiv="refresh" content="0; url=./${{ github.run_number }}/index.html">' > allure-history/index.html
+        with:
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_history: allure-history
 
       - name: Build Swagger coverage report
         if: always()
-        continue-on-error: true
         run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
 
       - name: Publish test report
@@ -88,7 +65,6 @@ jobs: # аналог этапов
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-          keep_files: true # Сохраняем файлы от старых запусков
 
       - name: Clean up services
         if: always()
