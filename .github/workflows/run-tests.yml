@@ -20,6 +20,11 @@ jobs: # аналог этапов
           distribution: 'corretto'
           java-version: '21'
 
+      - name: Set up Node.js # Нужен для установки Allure
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Cache Maven repository
         uses: actions/cache@v4
         with:
@@ -40,7 +45,7 @@ jobs: # аналог этапов
 
       - name: Run Swagger coverage
         if: always()
-        continue-on-error: true # чтобы падение swagger не ломало пайплайн
+        continue-on-error: true
         run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
 
       - name: Load test report history
@@ -51,16 +56,29 @@ jobs: # аналог этапов
           path: gh-pages
 
       - name: Build test report
-        uses: Xotabu4/allure-report-action@v1 # <--- ЗАМЕНА: используем поддерживаемый форк
         if: always()
-        with:
-          gh_pages: gh-pages
-          allure_results: target/allure-results
-          allure_history: allure-history
+        run: |
+          sudo npm install -g allure-commandline
+          # Копируем историю из предыдущих запусков (если она есть)
+          if [ -d gh-pages/history ]; then
+            mkdir -p target/allure-results/history
+            cp -r gh-pages/history target/allure-results/history
+          fi
+          # Генерируем отчет
+          allure generate target/allure-results -o allure-report
+          # Копируем сгенерированный отчет в папку с номером текущего запуска
+          mkdir -p allure-history
+          cp -r allure-report allure-history/${{ github.run_number }}
+          # Сохраняем историю для будущих запусков
+          if [ -d target/allure-results/history ]; then
+            cp -r target/allure-results/history allure-history/history
+          fi
+          # Создаем index.html, который будет автоматически перенаправлять на последний запуск
+          echo '<meta http-equiv="refresh" content="0; url=./${{ github.run_number }}/index.html">' > allure-history/index.html
 
       - name: Build Swagger coverage report
         if: always()
-        continue-on-error: true # <--- ДОБАВЛЕНО: игнорируем ошибку, если файла нет
+        continue-on-error: true
         run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
 
       - name: Publish test report
@@ -70,6 +88,7 @@ jobs: # аналог этапов
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
+          keep_files: true # Сохраняем файлы от старых запусков
 
       - name: Clean up services
         if: always()
