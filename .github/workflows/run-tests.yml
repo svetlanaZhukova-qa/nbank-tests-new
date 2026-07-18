@@ -29,11 +29,11 @@ jobs:
 
       # === НОВЫЙ ШАГ: установка Allure через официальное действие ===
       - name: Setup Allure
-        uses: allure-framework/setup-allure@v1
+        uses: sudo npm install -g allure-commandline
 
       - name: Set up services
         working-directory: infra/docker_compose   # ← правильно вместо cd
-        run: bash restart_docker.sh
+        run: bash restart-docker.sh
 
       - name: Run tests
         run: ./mvnw clean test -q
