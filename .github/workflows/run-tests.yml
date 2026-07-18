@@ -1,14 +1,16 @@
 name: Run tests
 
-# триггер
-on: [ push, workflow_dispatch ]
+on: [push, workflow_dispatch]
 
-jobs: # аналог этапов
+jobs:
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
-    steps: # шаги конкретной job
-      - name: Checkout repository # копируем файлы репозитория внутрь CI агента
+    permissions:
+      contents: write  # Обязательно для публикации в gh-pages
+
+    steps:
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -25,8 +27,13 @@ jobs: # аналог этапов
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # === НОВЫЙ ШАГ: установка Allure через официальное действие ===
+      - name: Setup Allure
+        uses: allure-framework/setup-allure@v1
+
       - name: Set up services
-        run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
+        working-directory: infra/docker_compose   # ← правильно вместо cd
+        run: bash restart_docker.sh
 
       - name: Run tests
         run: ./mvnw clean test -q
@@ -37,35 +44,65 @@ jobs: # аналог этапов
 
       - name: Run Swagger coverage
         if: always()
-        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
+        continue-on-error: true                   # ← не роняет整个 workflow
+        run: |
+          if [ -f .swagger-coverage-commandline/bin/swagger-coverage-commandline ]; then
+            .swagger-coverage-commandline/bin/swagger-coverage-commandline \
+              -s http://localhost:4111/v3/api-docs \
+              -i target/swagger-coverage-output
+          else
+            echo "⚠️ swagger-coverage-commandline не найден — шаг пропущен"
+          fi
 
       - name: Load test report history
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4                 # ← v2 → v4
         if: always()
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Build test report
-        uses: simple-elf/allure-report-action@v1.7
+      # === НОВАЯ генерация отчёта через allure CLI ===
+      - name: Generate Allure report
         if: always()
-        with:
-          gh_pages: gh-pages
-          allure_results: target/allure-results
-          allure_history: allure-history
+        run: |
+          mkdir -p allure-history
 
-      - name: Build Swagger coverage report
+          # Копируем историю из предыдущего отчёта (для трендов)
+          if [ -d gh-pages/latest/history ]; then
+            mkdir -p target/allure-results/history
+            cp -r gh-pages/latest/history/* target/allure-results/history/
+          fi
+
+          # Генерируем отчёт для текущего запуска
+          allure generate target/allure-results \
+            -o allure-history/${{ github.run_number }} --clean
+
+          # Обновляем "latest" → текущий отчёт
+          rm -rf allure-history/latest
+          cp -r allure-history/${{ github.run_number }} allure-history/latest
+
+          # index.html в корне — редирект на latest (решает проблему 404)
+          echo '<meta http-equiv="refresh" content="0; url=latest/index.html">' \
+            > allure-history/index.html
+
+      - name: Add Swagger coverage report
         if: always()
-        run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
+        continue-on-error: true
+        run: |
+          if [ -f swagger-coverage-report.html ]; then
+            cp swagger-coverage-report.html allure-history/${{ github.run_number }}/
+          fi
 
       - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4       # ← v3 → v4
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
+          keep_files: true                         # ← сохранять предыдущие отчёты
 
       - name: Clean up services
         if: always()
-        run: cd infra/docker_compose && docker compose down
+        working-directory: infra/docker_compose   # ← правильно вместо cd
+        run: docker compose down
