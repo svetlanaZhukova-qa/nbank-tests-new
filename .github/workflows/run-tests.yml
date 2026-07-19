@@ -31,8 +31,16 @@ jobs:
         run: sudo npm install -g allure-commandline
 
       - name: Set up services
-        working-directory: infra/docker_compose
-        run: bash restart-docker.sh
+        run: |
+            # Попробуем зайти в папку без пробела
+            cd infra/docker_compose 2>/dev/null || \
+            # Если не получилось, пробуем варианты с пробелами (в кавычках!)
+            cd "infra /docker_compose" 2>/dev/null || \
+            cd "infra/ docker_compose" 2>/dev/null || \
+            cd "infra / docker_compose"
+            
+            # Запускаем скрипт
+            bash restart-docker.sh
 
       - name: Run tests
         run: ./mvnw clean test -q
@@ -92,5 +100,10 @@ jobs:
 
       - name: Clean up services
         if: always()
-        working-directory: infra/docker_compose
-        run: docker compose down
+        run: |
+            cd infra/docker_compose 2>/dev/null || \
+            cd "infra /docker_compose" 2>/dev/null || \
+            cd "infra/ docker_compose" 2>/dev/null || \
+            cd "infra / docker_compose"
+            
+            docker compose down
